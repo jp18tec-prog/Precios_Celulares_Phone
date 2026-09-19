@@ -45,7 +45,6 @@
     flex-direction:column;
   }
 
-  /* HEADER */
   .topbar{
     display:flex;
     align-items:center;
@@ -82,11 +81,9 @@
   .brand-text .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;}
   .brand-text .role{font-size:11px;color:rgba(255,255,255,.6);}
 
-  /* SCREENS */
   .screen{display:none;flex:1;flex-direction:column;}
   .screen.active{display:flex;}
 
-  /* HOME */
   .home-hero{padding:28px 20px 10px;}
   .home-hero .eyebrow{color:var(--ink-soft);font-size:13px;margin:0 0 4px;}
   .home-hero h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-.01em;}
@@ -122,7 +119,6 @@
     flex-shrink:0;white-space:nowrap;
   }
 
-  /* SEARCH */
   .search-wrap{padding:16px 20px;background:var(--paper);position:sticky;top:66px;z-index:9;}
   .search-box{
     display:flex;align-items:center;gap:10px;
@@ -154,7 +150,6 @@
   .empty-state .big-emoji{font-size:32px;margin-bottom:8px;}
   .loading{padding:40px 24px;text-align:center;color:var(--ink-soft);font-size:14px;}
 
-  /* DETAIL */
   .detail-body{padding:22px 20px;flex:1;display:flex;flex-direction:column;gap:20px;}
   .detail-head .brand-tag{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
   .detail-head h2{margin:4px 0 6px;font-size:22px;line-height:1.25;}
@@ -216,12 +211,12 @@
   .offer-box .now{font-size:30px;font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
   .offer-box .save{font-size:12.5px;color:var(--warn);font-weight:600;margin-top:2px;}
   .promo-error{
-    background:#FDE8E8;color:#B3261E;border-radius:12px;
+    background:#F1F0EC;color:var(--ink-soft);border:1px solid var(--line);border-radius:12px;
     padding:12px 14px;font-size:13px;display:none;
+    align-items:center;gap:8px;
   }
-  .promo-error.active{display:block;}
+  .promo-error.active{display:flex;}
 
-  /* PIN gate */
   .pin-overlay{
     position:fixed;inset:0;background:rgba(15,27,45,.55);
     display:none;align-items:center;justify-content:center;padding:24px;z-index:50;
@@ -240,14 +235,12 @@
   .pin-cancel{background:var(--paper);color:var(--ink-soft);}
   .pin-confirm{background:var(--ink);color:#fff;}
 
-  /* Owner (compra) detail extras */
   .owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .owner-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
   .owner-box .k{font-size:11.5px;color:var(--ink-soft);margin-bottom:4px;}
   .owner-box .v{font-size:17px;font-weight:700;}
   .owner-box.margin .v{color:var(--accent-dark);}
 
-  /* Bloqueo de escritorio */
   .desktop-block{
     min-height:100vh;display:flex;align-items:center;justify-content:center;
     flex-direction:column;text-align:center;padding:40px 24px;
@@ -268,7 +261,6 @@
 
 <div class="app" id="app-root">
 
-  <!-- ===================== HOME ===================== -->
   <section id="screen-home" class="screen active">
     <div class="topbar">
       <div class="brand">
@@ -308,7 +300,6 @@
     </div>
   </section>
 
-  <!-- ===================== SEARCH (venta / compra comparten pantalla) ===================== -->
   <section id="screen-search" class="screen">
     <div class="topbar">
       <div class="back" onclick="goHome()">‹</div>
@@ -327,7 +318,6 @@
     <div id="results-list" class="results-list"></div>
   </section>
 
-  <!-- ===================== DETALLE VENTA ===================== -->
   <section id="screen-detail" class="screen">
     <div class="topbar">
       <div class="back" onclick="goBackToSearch()">‹</div>
@@ -374,7 +364,6 @@
     </div>
   </section>
 
-  <!-- ===================== DETALLE COMPRA (privado) ===================== -->
   <section id="screen-owner" class="screen">
     <div class="topbar">
       <div class="back" onclick="goBackToSearch()">‹</div>
@@ -400,7 +389,6 @@
     </div>
   </section>
 
-  <!-- ===================== PIN OVERLAY ===================== -->
   <div class="pin-overlay" id="pin-overlay">
     <div class="pin-box">
       <h3>Acceso privado</h3>
@@ -416,23 +404,16 @@
 </div>
 
 <script>
-/* =========================================================================
-   CONFIGURACIÓN — esto es lo único que tienes que editar tú, amigo
-   ========================================================================= */
 const CONFIG = {
-  // Pega aquí la URL de tu Apps Script que termina en /exec
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpZRGTtBhhVS80axHmwGvIxYg5p7u5q4zunuJbfAiD0eHwmBXxdXc_DEKsxQFYc0pv/exec",
-  // PIN para entrar a "Precio Compra" (cámbialo por el que quieras, 4-6 dígitos)
   PIN_COMPRA: "767698"
 };
-/* ========================================================================= */
 
-let modo = "venta";       // "venta" | "compra"
+let modo = "venta";
 let productoActual = null;
 let searchTimer = null;
-let searchReqId = 0;      // evita que una búsqueda vieja "pise" a una más nueva si el internet va lento
+let searchReqId = 0;
 
-/* ---------- BLOQUEO: solo celulares ---------- */
 function esCelular(){
   const ua = navigator.userAgent || navigator.vendor || window.opera;
   return /android|iphone|ipad|ipod|iemobile|opera mini|windows phone|mobile/i.test(ua);
@@ -448,15 +429,6 @@ function esCelular(){
   }
 })();
 
-/* ---------- JSONP: reemplaza a fetch() para evitar el bloqueo de CORS -----
-   Google Apps Script, cuando se le llama con fetch() normal desde otro
-   dominio (como GitHub Pages), responde con una redirección que no trae
-   el header que exige el navegador (Access-Control-Allow-Origin), así que
-   el navegador bloquea la respuesta ("No se pudo conectar").
-   JSONP evita ese problema por completo: en vez de pedir los datos con
-   fetch(), los carga como si fuera un archivo <script>, algo que los
-   navegadores siempre permiten entre dominios distintos.
-   --------------------------------------------------------------------- */
 function jsonpRequest(url, timeoutMs = 10000){
   return new Promise((resolve, reject) => {
     const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
@@ -515,7 +487,6 @@ function showScreen(id){
   document.getElementById(id).classList.add('active');
 }
 
-/* ---------- PIN ---------- */
 function askPin(){
   document.getElementById('pin-input').value = '';
   document.getElementById('pin-overlay').classList.add('active');
@@ -533,7 +504,6 @@ function checkPin(){
   }
 }
 
-/* ---------- BUSCAR ---------- */
 function onSearchInput(){
   clearTimeout(searchTimer);
   const q = document.getElementById('search-input').value;
@@ -544,13 +514,13 @@ async function buscarModelos(q){
   const list = document.getElementById('results-list');
   list.innerHTML = '<div class="loading">Buscando...</div>';
 
-  const miReqId = ++searchReqId; // marca esta búsqueda como "la más nueva"
+  const miReqId = ++searchReqId;
 
   try{
     const url = CONFIG.APPS_SCRIPT_URL + '?action=buscar&q=' + encodeURIComponent(q);
     const data = await jsonpRequest(url);
 
-    if (miReqId !== searchReqId) return; // llegó tarde: ya hay una búsqueda más nueva en curso, se ignora
+    if (miReqId !== searchReqId) return;
 
     if (data.error){
       list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>' + data.error + '</div>';
@@ -569,7 +539,7 @@ async function buscarModelos(q){
     resultados.forEach(p => {
       const card = document.createElement('div');
       card.className = 'result-card';
-      const precioMostrar = modo === 'venta' ? p.precioVenta : p.precioVenta; // la lista nunca muestra compra
+      const precioMostrar = modo === 'venta' ? p.precioVenta : p.precioVenta;
       card.innerHTML = `
         <div class="result-info">
           <div class="brand-tag">${p.marca}</div>
@@ -585,12 +555,11 @@ async function buscarModelos(q){
     });
 
   } catch(err){
-    if (miReqId !== searchReqId) return; // llegó tarde: se ignora
+    if (miReqId !== searchReqId) return;
     list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>No se pudo conectar. Revisa tu conexión o la URL configurada.</div>';
   }
 }
 
-/* ---------- DETALLE ---------- */
 function abrirDetalle(p){
   productoActual = p;
 
@@ -601,7 +570,6 @@ function abrirDetalle(p){
     document.getElementById('d-ram').textContent = p.ram;
     document.getElementById('d-precio').textContent = p.precioVenta;
 
-    // reset promo panel
     document.getElementById('promo-panel').classList.remove('active');
     document.getElementById('promo-result').classList.remove('active');
     document.getElementById('promo-error').classList.remove('active');
@@ -624,10 +592,6 @@ function abrirDetalle(p){
   }
 }
 
-/**
- * Pide el precio de compra real solo cuando se abre el detalle protegido
- * por PIN (nunca viaja en la búsqueda general, por seguridad).
- */
 async function cargarPrecioCompra(id){
   const box = document.getElementById('o-compra');
   try{
@@ -658,7 +622,7 @@ async function consultarPromo(){
   resBox.classList.remove('active');
 
   if (dni.length !== 8){
-    errBox.textContent = 'Ingresa un DNI válido de 8 dígitos.';
+    errBox.innerHTML = '🔎 <span>Ingresa un DNI válido de 8 dígitos.</span>';
     errBox.classList.add('active');
     return;
   }
@@ -672,7 +636,7 @@ async function consultarPromo(){
     const data = await jsonpRequest(url);
 
     if (data.error){
-      errBox.textContent = data.error;
+      errBox.innerHTML = '🔎 <span>' + data.error + '</span>';
       errBox.classList.add('active');
     } else {
       document.getElementById('pr-nombre').textContent = data.cliente;
@@ -682,7 +646,7 @@ async function consultarPromo(){
       resBox.classList.add('active');
     }
   } catch(err){
-    errBox.textContent = 'No se pudo conectar. Intenta de nuevo.';
+    errBox.innerHTML = '⚠️ <span>No se pudo conectar. Intenta de nuevo.</span>';
     errBox.classList.add('active');
   } finally {
     btn.disabled = false;
