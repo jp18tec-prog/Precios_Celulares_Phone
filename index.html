@@ -430,6 +430,7 @@ const CONFIG = {
 let modo = "venta";       // "venta" | "compra"
 let productoActual = null;
 let searchTimer = null;
+let searchReqId = 0;      // evita que una búsqueda vieja "pise" a una más nueva si el internet va lento
 
 /* ---------- BLOQUEO: solo celulares ---------- */
 function esCelular(){
@@ -543,9 +544,13 @@ async function buscarModelos(q){
   const list = document.getElementById('results-list');
   list.innerHTML = '<div class="loading">Buscando...</div>';
 
+  const miReqId = ++searchReqId; // marca esta búsqueda como "la más nueva"
+
   try{
     const url = CONFIG.APPS_SCRIPT_URL + '?action=buscar&q=' + encodeURIComponent(q);
     const data = await jsonpRequest(url);
+
+    if (miReqId !== searchReqId) return; // llegó tarde: ya hay una búsqueda más nueva en curso, se ignora
 
     if (data.error){
       list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>' + data.error + '</div>';
@@ -580,6 +585,7 @@ async function buscarModelos(q){
     });
 
   } catch(err){
+    if (miReqId !== searchReqId) return; // llegó tarde: se ignora
     list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>No se pudo conectar. Revisa tu conexión o la URL configurada.</div>';
   }
 }
@@ -611,9 +617,30 @@ function abrirDetalle(p){
     document.getElementById('o-venta').textContent = 'S/' + p.precioVenta;
     document.getElementById('o-promo').textContent = 'S/' + p.precioPromocion;
     document.getElementById('o-margen').textContent = 'S/' + p.descuentoDisponible;
-    document.getElementById('o-compra').textContent = '—'; // el buscador no expone compra; se revisa en Sheets
+    document.getElementById('o-compra').textContent = 'Cargando...';
 
     showScreen('screen-owner');
+    cargarPrecioCompra(p.id);
+  }
+}
+
+/**
+ * Pide el precio de compra real solo cuando se abre el detalle protegido
+ * por PIN (nunca viaja en la búsqueda general, por seguridad).
+ */
+async function cargarPrecioCompra(id){
+  const box = document.getElementById('o-compra');
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=detalle&id=' + encodeURIComponent(id);
+    const data = await jsonpRequest(url);
+
+    if (data.error || !data.producto){
+      box.textContent = 'Error';
+      return;
+    }
+    box.textContent = 'S/' + data.producto.precioCompra;
+  } catch(err){
+    box.textContent = 'Sin conexión';
   }
 }
 
