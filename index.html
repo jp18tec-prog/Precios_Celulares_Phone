@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Francell Store — Precios</title>
+<title>Precios Better</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -263,7 +263,7 @@
 <div class="desktop-block" id="desktop-block" style="display:none;">
   <div class="icon">📱</div>
   <h2>Abre esta página desde tu celular</h2>
-  <p>Por seguridad, el panel de precios de Francell Store solo funciona desde un teléfono móvil.</p>
+  <p>Por seguridad, el panel de precios de Precios Better solo funciona desde un teléfono móvil.</p>
 </div>
 
 <div class="app" id="app-root">
@@ -276,7 +276,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M5 12h4M15 12h4" stroke="#0F1B2D" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.4" fill="#0F1B2D"/></svg>
         </div>
         <div class="brand-text">
-          <div class="name">Francell Store</div>
+          <div class="name">Precios Better</div>
           <div class="role">Panel de precios</div>
         </div>
       </div>
@@ -447,6 +447,48 @@ function esCelular(){
   }
 })();
 
+/* ---------- JSONP: reemplaza a fetch() para evitar el bloqueo de CORS -----
+   Google Apps Script, cuando se le llama con fetch() normal desde otro
+   dominio (como GitHub Pages), responde con una redirección que no trae
+   el header que exige el navegador (Access-Control-Allow-Origin), así que
+   el navegador bloquea la respuesta ("No se pudo conectar").
+   JSONP evita ese problema por completo: en vez de pedir los datos con
+   fetch(), los carga como si fuera un archivo <script>, algo que los
+   navegadores siempre permiten entre dominios distintos.
+   --------------------------------------------------------------------- */
+function jsonpRequest(url, timeoutMs = 10000){
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+    const script = document.createElement('script');
+    let timeoutId;
+
+    function limpiar(){
+      clearTimeout(timeoutId);
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[callbackName] = function(data){
+      resolve(data);
+      limpiar();
+    };
+
+    script.onerror = function(){
+      reject(new Error('No se pudo conectar'));
+      limpiar();
+    };
+
+    timeoutId = setTimeout(() => {
+      reject(new Error('Tiempo de espera agotado'));
+      limpiar();
+    }, timeoutMs);
+
+    const separador = url.indexOf('?') === -1 ? '?' : '&';
+    script.src = url + separador + 'callback=' + callbackName;
+    document.body.appendChild(script);
+  });
+}
+
 function goHome(){
   showScreen('screen-home');
   document.getElementById('search-input').value = '';
@@ -503,8 +545,7 @@ async function buscarModelos(q){
 
   try{
     const url = CONFIG.APPS_SCRIPT_URL + '?action=buscar&q=' + encodeURIComponent(q);
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await jsonpRequest(url);
 
     if (data.error){
       list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>' + data.error + '</div>';
@@ -601,8 +642,7 @@ async function consultarPromo(){
 
   try{
     const url = CONFIG.APPS_SCRIPT_URL + '?action=promocion&id=' + productoActual.id + '&dni=' + dni;
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await jsonpRequest(url);
 
     if (data.error){
       errBox.textContent = data.error;
