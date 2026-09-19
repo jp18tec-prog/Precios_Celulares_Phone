@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Francell Store — Precios</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1B2D;
+    --ink-soft:#4B5A6B;
+    --paper:#F7F8FA;
+    --card:#FFFFFF;
+    --line:#E4E8EC;
+    --accent:#0EA5A0;
+    --accent-dark:#0B7F7B;
+    --accent-soft:#E3F6F5;
+    --warn:#D97A2B;
+    --warn-soft:#FBE9D9;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(15,27,45,.06), 0 8px 24px rgba(15,27,45,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  h1,h2,h3,.num{font-family:'Space Grotesk',sans-serif;}
+
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* HEADER */
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:18px 20px 14px;
+    background:var(--ink);
+    color:#fff;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  .topbar .back{
+    width:34px;height:34px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    font-size:18px;
+    line-height:1;
+  }
+  .topbar .back:active{background:rgba(255,255,255,.16);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:9px;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .brand-mark svg{width:18px;height:18px;}
+  .brand-text{line-height:1.15;}
+  .brand-text .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;}
+  .brand-text .role{font-size:11px;color:rgba(255,255,255,.6);}
+
+  /* SCREENS */
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* HOME */
+  .home-hero{padding:28px 20px 10px;}
+  .home-hero .eyebrow{color:var(--ink-soft);font-size:13px;margin:0 0 4px;}
+  .home-hero h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  .home-cards{padding:18px 20px 28px;display:flex;flex-direction:column;gap:14px;flex:1;}
+  .choice-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+    transition:transform .12s ease, border-color .12s ease;
+    text-align:left;
+  }
+  .choice-card:active{transform:scale(.98);}
+  .choice-card.primary{border-color:var(--accent);}
+  .choice-icon{
+    width:48px;height:48px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .choice-card.primary .choice-icon{background:var(--accent-soft);color:var(--accent-dark);}
+  .choice-card.secondary .choice-icon{background:#F1EEE8;color:#7A6A4E;}
+  .choice-icon svg{width:24px;height:24px;}
+  .choice-body h3{margin:0 0 3px;font-size:17px;}
+  .choice-body p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.4;}
+  .lock-tag{
+    margin-left:auto;font-size:11px;color:#7A6A4E;
+    background:#F1EEE8;padding:3px 8px;border-radius:20px;
+    flex-shrink:0;white-space:nowrap;
+  }
+
+  /* SEARCH */
+  .search-wrap{padding:16px 20px;background:var(--paper);position:sticky;top:66px;z-index:9;}
+  .search-box{
+    display:flex;align-items:center;gap:10px;
+    background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;
+    box-shadow:var(--shadow);
+  }
+  .search-box svg{width:18px;height:18px;color:var(--ink-soft);flex-shrink:0;}
+  .search-box input{
+    border:none;outline:none;background:transparent;
+    font-size:15px;width:100%;font-family:'Inter',sans-serif;color:var(--ink);
+  }
+  .results-count{padding:0 20px;font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+  .results-list{padding:0 20px 24px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto;}
+  .result-card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    cursor:pointer;
+  }
+  .result-card:active{background:#F1F5F5;}
+  .result-info .brand-tag{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  .result-info .model-name{font-weight:600;font-size:14.5px;margin:2px 0;}
+  .result-info .specs{font-size:12px;color:var(--ink-soft);}
+  .result-price{text-align:right;flex-shrink:0;}
+  .result-price .num{font-size:17px;font-weight:700;color:var(--ink);}
+  .result-price .cta{font-size:11px;color:var(--accent-dark);}
+
+  .empty-state{padding:40px 24px;text-align:center;color:var(--ink-soft);}
+  .empty-state .big-emoji{font-size:32px;margin-bottom:8px;}
+  .loading{padding:40px 24px;text-align:center;color:var(--ink-soft);font-size:14px;}
+
+  /* DETAIL */
+  .detail-body{padding:22px 20px;flex:1;display:flex;flex-direction:column;gap:20px;}
+  .detail-head .brand-tag{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .detail-head h2{margin:4px 0 6px;font-size:22px;line-height:1.25;}
+  .detail-head .specs-row{display:flex;gap:8px;}
+  .spec-pill{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12.5px;color:var(--ink-soft);}
+
+  .price-panel{
+    background:var(--ink);color:#fff;border-radius:20px;
+    padding:24px 22px;position:relative;overflow:hidden;
+  }
+  .price-panel::after{
+    content:"";position:absolute;right:-40px;top:-40px;
+    width:140px;height:140px;border-radius:50%;
+    background:radial-gradient(circle,rgba(14,165,160,.35),transparent 70%);
+  }
+  .price-panel .label{font-size:12.5px;color:rgba(255,255,255,.6);margin-bottom:6px;position:relative;}
+  .price-panel .price{font-size:38px;font-weight:700;letter-spacing:-.01em;position:relative;}
+  .price-panel .price small{font-size:17px;font-weight:600;vertical-align:2px;}
+
+  .promo-toggle{
+    background:var(--accent-soft);color:var(--accent-dark);
+    border:none;border-radius:14px;padding:15px;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:14.5px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    cursor:pointer;
+  }
+  .promo-toggle:active{background:#D2EDEB;}
+
+  .promo-panel{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:20px;display:none;flex-direction:column;gap:14px;
+  }
+  .promo-panel.active{display:flex;}
+  .promo-panel h4{margin:0;font-size:15px;}
+  .promo-panel .hint{font-size:12.5px;color:var(--ink-soft);margin-top:-8px;}
+  .dni-row{display:flex;gap:8px;}
+  .dni-row input{
+    flex:1;border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;
+    outline:none;
+  }
+  .dni-row input:focus{border-color:var(--accent);}
+  .btn-check{
+    background:var(--ink);color:#fff;border:none;border-radius:12px;
+    padding:0 18px;font-weight:600;font-size:14px;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .btn-check:disabled{opacity:.5;}
+
+  .promo-result{display:none;flex-direction:column;gap:12px;}
+  .promo-result.active{display:flex;}
+  .client-name{font-size:13px;color:var(--ink-soft);}
+  .client-name strong{color:var(--ink);}
+  .offer-box{
+    background:var(--warn-soft);border:1px dashed var(--warn);border-radius:14px;
+    padding:16px;text-align:center;
+  }
+  .offer-box .was{font-size:13px;color:var(--ink-soft);text-decoration:line-through;}
+  .offer-box .now{font-size:30px;font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
+  .offer-box .save{font-size:12.5px;color:var(--warn);font-weight:600;margin-top:2px;}
+  .promo-error{
+    background:#FDE8E8;color:#B3261E;border-radius:12px;
+    padding:12px 14px;font-size:13px;display:none;
+  }
+  .promo-error.active{display:block;}
+
+  /* PIN gate */
+  .pin-overlay{
+    position:fixed;inset:0;background:rgba(15,27,45,.55);
+    display:none;align-items:center;justify-content:center;padding:24px;z-index:50;
+  }
+  .pin-overlay.active{display:flex;}
+  .pin-box{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:340px;}
+  .pin-box h3{margin:0 0 6px;font-size:17px;}
+  .pin-box p{margin:0 0 16px;font-size:13px;color:var(--ink-soft);}
+  .pin-box input{
+    width:100%;border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;font-size:16px;letter-spacing:4px;text-align:center;
+    outline:none;margin-bottom:12px;
+  }
+  .pin-actions{display:flex;gap:10px;}
+  .pin-actions button{flex:1;border:none;border-radius:12px;padding:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;}
+  .pin-cancel{background:var(--paper);color:var(--ink-soft);}
+  .pin-confirm{background:var(--ink);color:#fff;}
+
+  /* Owner (compra) detail extras */
+  .owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .owner-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
+  .owner-box .k{font-size:11.5px;color:var(--ink-soft);margin-bottom:4px;}
+  .owner-box .v{font-size:17px;font-weight:700;}
+  .owner-box.margin .v{color:var(--accent-dark);}
+
+  /* Bloqueo de escritorio */
+  .desktop-block{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;text-align:center;padding:40px 24px;
+    background:var(--ink);color:#fff;
+  }
+  .desktop-block .icon{font-size:44px;margin-bottom:16px;}
+  .desktop-block h2{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 10px;}
+  .desktop-block p{color:rgba(255,255,255,.7);font-size:14.5px;max-width:320px;line-height:1.5;margin:0;}
+</style>
+</head>
+<body>
+
+<div class="desktop-block" id="desktop-block" style="display:none;">
+  <div class="icon">📱</div>
+  <h2>Abre esta página desde tu celular</h2>
+  <p>Por seguridad, el panel de precios de Francell Store solo funciona desde un teléfono móvil.</p>
+</div>
+
+<div class="app" id="app-root">
+
+  <!-- ===================== HOME ===================== -->
+  <section id="screen-home" class="screen active">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M5 12h4M15 12h4" stroke="#0F1B2D" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.4" fill="#0F1B2D"/></svg>
+        </div>
+        <div class="brand-text">
+          <div class="name">Francell Store</div>
+          <div class="role">Panel de precios</div>
+        </div>
+      </div>
+    </div>
+    <div class="home-hero">
+      <p class="eyebrow">¿Qué necesitas ver?</p>
+      <h1>Elige una opción</h1>
+    </div>
+    <div class="home-cards">
+      <div class="choice-card primary" onclick="goSearch('venta')">
+        <div class="choice-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="choice-body">
+          <h3>Precio Venta</h3>
+          <p>Lo que le muestras al cliente. Incluye promoción por DNI.</p>
+        </div>
+      </div>
+      <div class="choice-card secondary" onclick="askPin()">
+        <div class="choice-icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <div class="choice-body">
+          <h3>Precio Compra</h3>
+          <p>Solo para ti: costo, margen real y ganancia por equipo.</p>
+        </div>
+        <span class="lock-tag">🔒 Privado</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SEARCH (venta / compra comparten pantalla) ===================== -->
+  <section id="screen-search" class="screen">
+    <div class="topbar">
+      <div class="back" onclick="goHome()">‹</div>
+      <div class="brand-text">
+        <div class="name" id="search-title" style="font-size:15px;">Precio Venta</div>
+        <div class="role" id="search-sub">Busca el modelo</div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="search-input" type="text" placeholder="Ej: Redmi, iPhone 17, S25 Ultra..." oninput="onSearchInput()">
+      </div>
+    </div>
+    <div id="results-count" class="results-count"></div>
+    <div id="results-list" class="results-list"></div>
+  </section>
+
+  <!-- ===================== DETALLE VENTA ===================== -->
+  <section id="screen-detail" class="screen">
+    <div class="topbar">
+      <div class="back" onclick="goBackToSearch()">‹</div>
+      <div class="brand-text">
+        <div class="name" style="font-size:15px;">Detalle del equipo</div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-head">
+        <div class="brand-tag" id="d-brand">MARCA</div>
+        <h2 id="d-model">Modelo</h2>
+        <div class="specs-row">
+          <span class="spec-pill" id="d-cap">-</span>
+          <span class="spec-pill" id="d-ram">-</span>
+        </div>
+      </div>
+
+      <div class="price-panel">
+        <div class="label">Precio de venta</div>
+        <div class="price"><small>S/</small> <span id="d-precio">0</span></div>
+      </div>
+
+      <button class="promo-toggle" id="promo-btn" onclick="togglePromo()">
+        🎁 Ver si tiene promoción disponible
+      </button>
+
+      <div class="promo-panel" id="promo-panel">
+        <h4>Consultar promoción por DNI</h4>
+        <p class="hint">Ingresa el DNI del cliente para ver si aplica un descuento.</p>
+        <div class="dni-row">
+          <input id="dni-input" type="tel" maxlength="8" placeholder="Ej: 76769841" oninput="this.value=this.value.replace(/\D/g,'')">
+          <button class="btn-check" id="btn-consultar" onclick="consultarPromo()">Buscar</button>
+        </div>
+        <div class="promo-error" id="promo-error"></div>
+        <div class="promo-result" id="promo-result">
+          <div class="client-name">Cliente: <strong id="pr-nombre">-</strong></div>
+          <div class="offer-box">
+            <div class="was">Antes: S/<span id="pr-antes">0</span></div>
+            <div class="now">S/<span id="pr-ahora">0</span></div>
+            <div class="save">Ahorras S/<span id="pr-ahorro">0</span> hoy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DETALLE COMPRA (privado) ===================== -->
+  <section id="screen-owner" class="screen">
+    <div class="topbar">
+      <div class="back" onclick="goBackToSearch()">‹</div>
+      <div class="brand-text">
+        <div class="name" style="font-size:15px;">Vista interna 🔒</div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-head">
+        <div class="brand-tag" id="o-brand">MARCA</div>
+        <h2 id="o-model">Modelo</h2>
+        <div class="specs-row">
+          <span class="spec-pill" id="o-cap">-</span>
+          <span class="spec-pill" id="o-ram">-</span>
+        </div>
+      </div>
+      <div class="owner-grid">
+        <div class="owner-box"><div class="k">Precio compra</div><div class="v" id="o-compra">S/0</div></div>
+        <div class="owner-box"><div class="k">Precio venta mostrado</div><div class="v" id="o-venta">S/0</div></div>
+        <div class="owner-box"><div class="k">Precio promoción</div><div class="v" id="o-promo">S/0</div></div>
+        <div class="owner-box margin"><div class="k">Ganancia mínima</div><div class="v" id="o-margen">S/0</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PIN OVERLAY ===================== -->
+  <div class="pin-overlay" id="pin-overlay">
+    <div class="pin-box">
+      <h3>Acceso privado</h3>
+      <p>Esta sección muestra tus precios de compra. Ingresa tu PIN.</p>
+      <input id="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+      <div class="pin-actions">
+        <button class="pin-cancel" onclick="closePin()">Cancelar</button>
+        <button class="pin-confirm" onclick="checkPin()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================================
+   CONFIGURACIÓN — esto es lo único que tienes que editar tú, amigo
+   ========================================================================= */
+const CONFIG = {
+  // Pega aquí la URL de tu Apps Script que termina en /exec
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpZRGTtBhhVS80axHmwGvIxYg5p7u5q4zunuJbfAiD0eHwmBXxdXc_DEKsxQFYc0pv/exec",
+  // PIN para entrar a "Precio Compra" (cámbialo por el que quieras, 4-6 dígitos)
+  PIN_COMPRA: "767698"
+};
+/* ========================================================================= */
+
+let modo = "venta";       // "venta" | "compra"
+let productoActual = null;
+let searchTimer = null;
+
+/* ---------- BLOQUEO: solo celulares ---------- */
+function esCelular(){
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  return /android|iphone|ipad|ipod|iemobile|opera mini|windows phone|mobile/i.test(ua);
+}
+
+(function verificarDispositivo(){
+  if (esCelular()){
+    document.getElementById('app-root').style.display = 'flex';
+    document.getElementById('desktop-block').style.display = 'none';
+  } else {
+    document.getElementById('app-root').style.display = 'none';
+    document.getElementById('desktop-block').style.display = 'flex';
+  }
+})();
+
+function goHome(){
+  showScreen('screen-home');
+  document.getElementById('search-input').value = '';
+}
+
+function goSearch(m){
+  modo = m;
+  document.getElementById('search-title').textContent = m === 'venta' ? 'Precio Venta' : 'Precio Compra';
+  document.getElementById('search-sub').textContent = m === 'venta' ? 'Esto lo ve el cliente' : 'Solo para ti';
+  document.getElementById('results-list').innerHTML = '';
+  document.getElementById('results-count').textContent = '';
+  document.getElementById('search-input').value = '';
+  showScreen('screen-search');
+  buscarModelos('');
+}
+
+function goBackToSearch(){
+  showScreen('screen-search');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ---------- PIN ---------- */
+function askPin(){
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-overlay').classList.add('active');
+}
+function closePin(){
+  document.getElementById('pin-overlay').classList.remove('active');
+}
+function checkPin(){
+  const val = document.getElementById('pin-input').value;
+  if (val === CONFIG.PIN_COMPRA){
+    closePin();
+    goSearch('compra');
+  } else {
+    alert('PIN incorrecto');
+  }
+}
+
+/* ---------- BUSCAR ---------- */
+function onSearchInput(){
+  clearTimeout(searchTimer);
+  const q = document.getElementById('search-input').value;
+  searchTimer = setTimeout(() => buscarModelos(q), 300);
+}
+
+async function buscarModelos(q){
+  const list = document.getElementById('results-list');
+  list.innerHTML = '<div class="loading">Buscando...</div>';
+
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=buscar&q=' + encodeURIComponent(q);
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.error){
+      list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>' + data.error + '</div>';
+      return;
+    }
+
+    const resultados = data.resultados || [];
+    document.getElementById('results-count').textContent = resultados.length + ' resultado(s)';
+
+    if (resultados.length === 0){
+      list.innerHTML = '<div class="empty-state"><div class="big-emoji">🔍</div>No se encontró ningún modelo con ese nombre.</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    resultados.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      const precioMostrar = modo === 'venta' ? p.precioVenta : p.precioVenta; // la lista nunca muestra compra
+      card.innerHTML = `
+        <div class="result-info">
+          <div class="brand-tag">${p.marca}</div>
+          <div class="model-name">${p.modelo}</div>
+          <div class="specs">${p.capacidad} · ${p.ram}</div>
+        </div>
+        <div class="result-price">
+          <div class="num">S/${precioMostrar}</div>
+          <div class="cta">Ver →</div>
+        </div>`;
+      card.onclick = () => abrirDetalle(p);
+      list.appendChild(card);
+    });
+
+  } catch(err){
+    list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>No se pudo conectar. Revisa tu conexión o la URL configurada.</div>';
+  }
+}
+
+/* ---------- DETALLE ---------- */
+function abrirDetalle(p){
+  productoActual = p;
+
+  if (modo === 'venta'){
+    document.getElementById('d-brand').textContent = p.marca;
+    document.getElementById('d-model').textContent = p.modelo;
+    document.getElementById('d-cap').textContent = p.capacidad;
+    document.getElementById('d-ram').textContent = p.ram;
+    document.getElementById('d-precio').textContent = p.precioVenta;
+
+    // reset promo panel
+    document.getElementById('promo-panel').classList.remove('active');
+    document.getElementById('promo-result').classList.remove('active');
+    document.getElementById('promo-error').classList.remove('active');
+    document.getElementById('dni-input').value = '';
+    document.getElementById('promo-btn').style.display = 'flex';
+
+    showScreen('screen-detail');
+  } else {
+    document.getElementById('o-brand').textContent = p.marca;
+    document.getElementById('o-model').textContent = p.modelo;
+    document.getElementById('o-cap').textContent = p.capacidad;
+    document.getElementById('o-ram').textContent = p.ram;
+    document.getElementById('o-venta').textContent = 'S/' + p.precioVenta;
+    document.getElementById('o-promo').textContent = 'S/' + p.precioPromocion;
+    document.getElementById('o-margen').textContent = 'S/' + p.descuentoDisponible;
+    document.getElementById('o-compra').textContent = '—'; // el buscador no expone compra; se revisa en Sheets
+
+    showScreen('screen-owner');
+  }
+}
+
+function togglePromo(){
+  const panel = document.getElementById('promo-panel');
+  panel.classList.toggle('active');
+  document.getElementById('promo-btn').style.display = panel.classList.contains('active') ? 'none' : 'flex';
+}
+
+async function consultarPromo(){
+  const dni = document.getElementById('dni-input').value;
+  const errBox = document.getElementById('promo-error');
+  const resBox = document.getElementById('promo-result');
+  errBox.classList.remove('active');
+  resBox.classList.remove('active');
+
+  if (dni.length !== 8){
+    errBox.textContent = 'Ingresa un DNI válido de 8 dígitos.';
+    errBox.classList.add('active');
+    return;
+  }
+
+  const btn = document.getElementById('btn-consultar');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=promocion&id=' + productoActual.id + '&dni=' + dni;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.error){
+      errBox.textContent = data.error;
+      errBox.classList.add('active');
+    } else {
+      document.getElementById('pr-nombre').textContent = data.cliente;
+      document.getElementById('pr-antes').textContent = data.producto.precioVenta;
+      document.getElementById('pr-ahora').textContent = data.producto.precioPromocion;
+      document.getElementById('pr-ahorro').textContent = data.producto.descuento;
+      resBox.classList.add('active');
+    }
+  } catch(err){
+    errBox.textContent = 'No se pudo conectar. Intenta de nuevo.';
+    errBox.classList.add('active');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buscar';
+  }
+}
+</script>
+</body>
+</html>
