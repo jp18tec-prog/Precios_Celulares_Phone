@@ -335,6 +335,8 @@
         </div>
       </div>
 
+      <img id="d-foto" src="" loading="lazy" style="width:100%;max-height:220px;object-fit:contain;background:#F1F0EC;border-radius:16px;padding:10px;">
+
       <div class="price-panel">
         <div class="label">Precio de venta</div>
         <div class="price"><small>S/</small> <span id="d-precio">0</span></div>
@@ -342,6 +344,10 @@
 
       <button class="promo-toggle" id="promo-btn" onclick="togglePromo()">
         🎁 Ver si tiene promoción disponible
+      </button>
+
+      <button class="promo-toggle" style="background:#ECEAF6;color:#4C3F91;" onclick="abrirComparar()">
+        ⚖️ Comparar con otro modelo
       </button>
 
       <div class="promo-panel" id="promo-panel">
@@ -358,6 +364,69 @@
             <div class="was">Antes: S/<span id="pr-antes">0</span></div>
             <div class="now">S/<span id="pr-ahora">0</span></div>
             <div class="save">Ahorras S/<span id="pr-ahorro">0</span> hoy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPARAR ===================== -->
+  <section id="screen-compare" class="screen">
+    <div class="topbar">
+      <div class="back" onclick="goBackToSearch()">‹</div>
+      <div class="brand-text">
+        <div class="name" style="font-size:15px;">Comparar equipos</div>
+      </div>
+    </div>
+    <div class="detail-body" style="gap:16px;">
+
+      <div id="compare-picker">
+        <p class="hint" style="margin:0 0 10px;">Elige el segundo modelo para comparar con <strong id="cmp-a-name">-</strong>:</p>
+        <div class="search-box" style="margin-bottom:10px;">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="compare-search-input" type="text" placeholder="Ej: Redmi Note 15 Pro..." oninput="onCompareSearchInput()">
+        </div>
+        <div id="compare-results-list" class="results-list" style="padding:0;"></div>
+      </div>
+
+      <div id="compare-table-wrap" style="display:none;">
+        <table id="compare-table" style="width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;">
+          <thead>
+            <tr style="background:var(--ink);color:#fff;">
+              <th style="padding:12px 10px;text-align:left;font-size:12px;width:30%;">Especificación</th>
+              <th id="cmp-head-a" style="padding:12px 8px;text-align:center;font-size:12.5px;">A</th>
+              <th id="cmp-head-b" style="padding:12px 8px;text-align:center;font-size:12.5px;">B</th>
+            </tr>
+          </thead>
+          <tbody id="compare-tbody" style="font-size:12.5px;"></tbody>
+        </table>
+
+        <button class="promo-toggle" style="margin-top:14px;" onclick="cambiarModeloB()">
+          🔄 Cambiar segundo modelo
+        </button>
+
+        <div class="promo-panel active" style="margin-top:14px;">
+          <h4>Consultar promoción por DNI (para ambos)</h4>
+          <div class="dni-row">
+            <input id="cmp-dni-input" type="tel" maxlength="8" placeholder="Ej: 76769841" oninput="this.value=this.value.replace(/\D/g,'')">
+            <button class="btn-check" id="cmp-btn-consultar" onclick="consultarPromoComparar()">Buscar</button>
+          </div>
+          <div class="promo-error" id="cmp-promo-error"></div>
+        </div>
+
+        <div class="promo-result" id="cmp-promo-result" style="margin-top:14px;">
+          <div class="client-name">Cliente: <strong id="cmp-pr-nombre">-</strong></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="offer-box">
+              <div class="was">Antes: S/<span id="cmp-a-antes">0</span></div>
+              <div class="now">S/<span id="cmp-a-ahora">0</span></div>
+              <div class="save">Ahorras S/<span id="cmp-a-ahorro">0</span></div>
+            </div>
+            <div class="offer-box">
+              <div class="was">Antes: S/<span id="cmp-b-antes">0</span></div>
+              <div class="now">S/<span id="cmp-b-ahora">0</span></div>
+              <div class="save">Ahorras S/<span id="cmp-b-ahorro">0</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -406,8 +475,21 @@
 <script>
 const CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpZRGTtBhhVS80axHmwGvIxYg5p7u5q4zunuJbfAiD0eHwmBXxdXc_DEKsxQFYc0pv/exec",
-  PIN_COMPRA: "767698"
+  PIN_COMPRA: "767698",
+  // Carpeta donde subes las fotos dentro de tu mismo repositorio de GitHub
+  // (vacío "" porque tus fotos quedaron en la raíz del repositorio, no en una subcarpeta)
+  CARPETA_IMAGENES: ""
 };
+
+// Ícono de respaldo (SVG) cuando un modelo todavía no tiene foto subida
+const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#F1F0EC"/><path d="M35 20h30a5 5 0 015 5v50a5 5 0 01-5 5H35a5 5 0 01-5-5V25a5 5 0 015-5z" fill="none" stroke="#B9B4A8" stroke-width="3"/><circle cx="50" cy="70" r="3" fill="#B9B4A8"/></svg>`
+);
+
+function rutaImagen(nombreArchivo){
+  if (!nombreArchivo) return IMG_PLACEHOLDER;
+  return CONFIG.CARPETA_IMAGENES + nombreArchivo;
+}
 
 let modo = "venta";
 let productoActual = null;
@@ -541,6 +623,8 @@ async function buscarModelos(q){
       card.className = 'result-card';
       const precioMostrar = modo === 'venta' ? p.precioVenta : p.precioVenta;
       card.innerHTML = `
+        <img src="${rutaImagen(p.imagen)}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'"
+             style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#F1F0EC;">
         <div class="result-info">
           <div class="brand-tag">${p.marca}</div>
           <div class="model-name">${p.modelo}</div>
@@ -569,6 +653,8 @@ function abrirDetalle(p){
     document.getElementById('d-cap').textContent = p.capacidad;
     document.getElementById('d-ram').textContent = p.ram;
     document.getElementById('d-precio').textContent = p.precioVenta;
+    document.getElementById('d-foto').src = rutaImagen(p.imagen);
+    document.getElementById('d-foto').onerror = function(){ this.src = IMG_PLACEHOLDER; };
 
     document.getElementById('promo-panel').classList.remove('active');
     document.getElementById('promo-result').classList.remove('active');
@@ -612,6 +698,164 @@ function togglePromo(){
   const panel = document.getElementById('promo-panel');
   panel.classList.toggle('active');
   document.getElementById('promo-btn').style.display = panel.classList.contains('active') ? 'none' : 'flex';
+}
+
+/* ---------- COMPARAR ---------- */
+let cmpA = null;
+let cmpB = null;
+let cmpSearchTimer = null;
+
+function abrirComparar(){
+  cmpA = productoActual;
+  cmpB = null;
+  document.getElementById('cmp-a-name').textContent = cmpA.marca + ' ' + cmpA.modelo;
+  document.getElementById('compare-search-input').value = '';
+  document.getElementById('compare-picker').style.display = 'block';
+  document.getElementById('compare-table-wrap').style.display = 'none';
+  document.getElementById('compare-results-list').innerHTML = '';
+  showScreen('screen-compare');
+}
+
+function cambiarModeloB(){
+  cmpB = null;
+  document.getElementById('compare-search-input').value = '';
+  document.getElementById('compare-picker').style.display = 'block';
+  document.getElementById('compare-table-wrap').style.display = 'none';
+  document.getElementById('compare-results-list').innerHTML = '';
+  buscarParaComparar('');
+}
+
+function onCompareSearchInput(){
+  clearTimeout(cmpSearchTimer);
+  const q = document.getElementById('compare-search-input').value;
+  cmpSearchTimer = setTimeout(() => buscarParaComparar(q), 300);
+}
+
+async function buscarParaComparar(q){
+  const list = document.getElementById('compare-results-list');
+  list.innerHTML = '<div class="loading">Buscando...</div>';
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=buscar&q=' + encodeURIComponent(q);
+    const data = await jsonpRequest(url);
+    const resultados = (data.resultados || []).filter(p => p.id !== cmpA.id);
+
+    if (resultados.length === 0){
+      list.innerHTML = '<div class="empty-state"><div class="big-emoji">🔍</div>No se encontró ningún modelo.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    resultados.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `
+        <div class="result-info">
+          <div class="brand-tag">${p.marca}</div>
+          <div class="model-name">${p.modelo}</div>
+          <div class="specs">${p.capacidad} · ${p.ram}</div>
+        </div>
+        <div class="result-price"><div class="num">S/${p.precioVenta}</div></div>`;
+      card.onclick = () => elegirModeloB(p);
+      list.appendChild(card);
+    });
+  } catch(err){
+    list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>No se pudo conectar.</div>';
+  }
+}
+
+function elegirModeloB(p){
+  cmpB = p;
+  document.getElementById('compare-picker').style.display = 'none';
+  document.getElementById('compare-table-wrap').style.display = 'block';
+  document.getElementById('cmp-promo-result').classList.remove('active');
+  document.getElementById('cmp-promo-error').classList.remove('active');
+  document.getElementById('cmp-dni-input').value = '';
+  renderTablaComparativa();
+}
+
+function renderTablaComparativa(){
+  document.getElementById('cmp-head-a').textContent = cmpA.marca + ' ' + cmpA.modelo;
+  document.getElementById('cmp-head-b').textContent = cmpB.marca + ' ' + cmpB.modelo;
+
+  const filas = [
+    ['__foto__', cmpA.imagen, cmpB.imagen],
+    ['Capacidad', cmpA.capacidad, cmpB.capacidad],
+    ['RAM', cmpA.ram, cmpB.ram],
+    ['Cámara', cmpA.camara || '-', cmpB.camara || '-'],
+    ['Batería', cmpA.bateria || '-', cmpB.bateria || '-'],
+    ['Carga', cmpA.carga || '-', cmpB.carga || '-'],
+    ['Procesador', cmpA.procesador || '-', cmpB.procesador || '-'],
+    ['Pantalla', cmpA.pantalla || '-', cmpB.pantalla || '-'],
+    ['Tasa de refresco', cmpA.tasaRefresco || '-', cmpB.tasaRefresco || '-'],
+    ['Precio venta', 'S/' + cmpA.precioVenta, 'S/' + cmpB.precioVenta],
+  ];
+
+  const tbody = document.getElementById('compare-tbody');
+  tbody.innerHTML = '';
+  filas.forEach((f, i) => {
+    const tr = document.createElement('tr');
+    tr.style.borderTop = '1px solid var(--line)';
+    if (i % 2 === 1) tr.style.background = '#FAFAFA';
+
+    if (f[0] === '__foto__'){
+      tr.innerHTML = `
+        <td style="padding:10px;color:var(--ink-soft);">Foto</td>
+        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[1])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:#F1F0EC;border-radius:8px;"></td>
+        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[2])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:#F1F0EC;border-radius:8px;"></td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    const destacar = f[0] === 'Precio venta' ? 'font-weight:700;' : '';
+    tr.innerHTML = `
+      <td style="padding:10px;color:var(--ink-soft);">${f[0]}</td>
+      <td style="padding:10px;text-align:center;${destacar}">${f[1]}</td>
+      <td style="padding:10px;text-align:center;${destacar}">${f[2]}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function consultarPromoComparar(){
+  const dni = document.getElementById('cmp-dni-input').value;
+  const errBox = document.getElementById('cmp-promo-error');
+  const resBox = document.getElementById('cmp-promo-result');
+  errBox.classList.remove('active');
+  resBox.classList.remove('active');
+
+  if (dni.length !== 8){
+    errBox.innerHTML = '🔎 <span>Ingresa un DNI válido de 8 dígitos.</span>';
+    errBox.classList.add('active');
+    return;
+  }
+
+  const btn = document.getElementById('cmp-btn-consultar');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try{
+    const urlA = CONFIG.APPS_SCRIPT_URL + '?action=promocion&id=' + cmpA.id + '&dni=' + dni;
+    const urlB = CONFIG.APPS_SCRIPT_URL + '?action=promocion&id=' + cmpB.id + '&dni=' + dni;
+    const [dataA, dataB] = await Promise.all([jsonpRequest(urlA), jsonpRequest(urlB)]);
+
+    if (dataA.error){
+      errBox.innerHTML = '🔎 <span>' + dataA.error + '</span>';
+      errBox.classList.add('active');
+    } else {
+      document.getElementById('cmp-pr-nombre').textContent = dataA.cliente;
+      document.getElementById('cmp-a-antes').textContent = dataA.producto.precioVenta;
+      document.getElementById('cmp-a-ahora').textContent = dataA.producto.precioPromocion;
+      document.getElementById('cmp-a-ahorro').textContent = dataA.producto.descuento;
+      document.getElementById('cmp-b-antes').textContent = dataB.producto.precioVenta;
+      document.getElementById('cmp-b-ahora').textContent = dataB.producto.precioPromocion;
+      document.getElementById('cmp-b-ahorro').textContent = dataB.producto.descuento;
+      resBox.classList.add('active');
+    }
+  } catch(err){
+    errBox.innerHTML = '⚠️ <span>No se pudo conectar. Intenta de nuevo.</span>';
+    errBox.classList.add('active');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buscar';
+  }
 }
 
 async function consultarPromo(){
