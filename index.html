@@ -240,6 +240,8 @@
     align-items:center;gap:8px;
   }
   .promo-error.active{display:flex;}
+  .promo-error.error{background:#FDECEC;color:#B3261E;border-color:#F6C9C6;}
+  .promo-error.exito{background:#E3F6ED;color:#1B7A4B;border-color:#B8E6CB;}
 
   .pin-overlay{
     position:fixed;inset:0;background:rgba(15,27,45,.55);
@@ -316,6 +318,14 @@
     cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;
   }
   .price-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  /* Vender: mini botón en tabla comparativa */
+  .vender-mini-btn{
+    background:#fff;border:1.5px solid var(--accent);color:var(--accent-dark);
+    border-radius:20px;padding:6px 16px;font-weight:700;font-size:12.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .vender-mini-btn:active{background:var(--accent-soft);}
 </style>
 </head>
 <body>
@@ -392,7 +402,7 @@
         <span class="lock-tag">🔒 Privado</span>
       </div>
     </div>
-    <div class="home-footer">Francell Store · uso interno</div>
+    <div class="home-footer">Precios Better · uso interno</div>
   </section>
 
   <section id="screen-search" class="screen">
@@ -461,6 +471,10 @@
 
       <button class="promo-toggle" style="background:#ECEAF6;color:#4C3F91;" onclick="abrirComparar()">
         ⚖️ Comparar con otro modelo
+      </button>
+
+      <button class="promo-toggle" style="background:var(--ink);color:#fff;" onclick="abrirVender(productoActual)">
+        🧾 Proceder a vender
       </button>
 
       <div class="promo-panel" id="promo-panel">
@@ -543,6 +557,59 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROCEDER A VENDER ===================== -->
+  <section id="screen-vender" class="screen">
+    <div class="topbar">
+      <div class="back" onclick="history.back()">‹</div>
+      <div class="brand-text">
+        <div class="name" style="font-size:15px;">Proceder a vender</div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-head">
+        <div class="brand-tag">EQUIPO</div>
+        <h2 id="vender-equipo">-</h2>
+        <div class="specs-row">
+          <span class="spec-pill" id="vender-specs">-</span>
+        </div>
+      </div>
+
+      <div class="promo-panel active">
+        <h4>Datos del cliente</h4>
+        <div class="dni-row">
+          <input id="venta-dni" type="tel" maxlength="8" placeholder="DNI del cliente" oninput="this.value=this.value.replace(/\D/g,'')">
+          <button class="btn-check" id="venta-btn-buscar-dni" onclick="buscarClienteVenta()">Buscar</button>
+        </div>
+        <div class="promo-error" id="venta-reniec-error"></div>
+        <div class="login-field" style="margin-top:6px;">
+          <label>Nombre del cliente</label>
+          <input id="venta-nombre" type="text" placeholder="Se autocompleta o escríbelo tú">
+        </div>
+      </div>
+
+      <div class="promo-panel active">
+        <h4>Datos de la venta</h4>
+        <div class="login-field">
+          <label>Precio acordado (S/)</label>
+          <input id="venta-precio" type="number" placeholder="0">
+        </div>
+        <div class="login-field">
+          <label>IMEI del equipo (15 dígitos)</label>
+          <input id="venta-imei" type="tel" maxlength="15" placeholder="Ej: 356938035643809" oninput="this.value=this.value.replace(/\D/g,'').slice(0,15)">
+        </div>
+      </div>
+
+      <div class="promo-panel active">
+        <h4>📧 Correo del cliente</h4>
+        <p class="hint">Ahí le llegará el resumen de su compra.</p>
+        <input id="venta-correo" type="email" placeholder="correo@ejemplo.com" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
+      </div>
+
+      <button class="btn-check" id="venta-btn-enviar" style="width:100%;padding:15px;border-radius:14px;font-size:15px;" onclick="enviarVenta()">Enviar resumen</button>
+      <div class="promo-error" id="venta-resultado"></div>
     </div>
   </section>
 
@@ -711,11 +778,7 @@ function goHome(){
   try{ sessionStorage.removeItem('fs_ultima_pantalla'); }catch(e){}
 }
 
-/* ---------- NAVEGACIÓN CON HISTORIAL (botón atrás físico del celular) ----------
-   Cada vez que entramos a una pantalla nueva, la registramos en el historial
-   del navegador. Así, cuando el cliente usa el botón/gesto de "atrás" del
-   celular, en vez de salirse de la página, retrocede dentro de la app,
-   pantalla por pantalla, hasta llegar a Inicio (recién ahí sí sale). */
+/* ---------- NAVEGACIÓN CON HISTORIAL (botón atrás físico del celular) ---------- */
 function irA(id){
   try { history.pushState({ screen: id }, '', '#' + id); } catch(e){}
   showScreen(id);
@@ -731,10 +794,6 @@ window.addEventListener('popstate', function(e){
   guardarUltimaPantalla();
 });
 
-/* ---------- RECORDAR LA ÚLTIMA PANTALLA (para que un refresh no te mande a Inicio) ----------
-   Guardamos SOLO en la memoria de esta pestaña (sessionStorage), no en el servidor.
-   Si el cliente cierra el navegador del todo, se olvida y arranca de Inicio de nuevo
-   la próxima vez — eso es intencional, para que un cliente nuevo siempre parta limpio. */
 function guardarUltimaPantalla(){
   try{
     const pantallaActiva = document.querySelector('.screen.active');
@@ -764,16 +823,13 @@ async function restaurarUltimaPantalla(){
       const url = CONFIG.APPS_SCRIPT_URL + '?action=detalle&id=' + encodeURIComponent(guardado.productoId);
       const data = await jsonpRequest(url);
       if (data.producto){
-        // Reconstruimos el "camino" (Inicio → Buscar → Detalle) para que el
-        // botón atrás siga funcionando normal después de restaurar.
         goSearch(modo);
         await buscarModelos('');
         abrirDetalle(data.producto);
       }
-    } catch(e){ /* si falla, simplemente se queda en Inicio, sin romper nada */ }
+    } catch(e){ }
     return;
   }
-  // "screen-compare" no se restaura (necesitaría 2 productos): se queda en Inicio.
 }
 
 function goSearch(m){
@@ -884,7 +940,6 @@ function renderResultados(resultados){
   });
 }
 
-/* ---------- FILTRO DE PRECIO ---------- */
 function resetFiltroPrecio(){
   filtroPrecioActivo = 'todos';
   document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('active'));
@@ -909,7 +964,6 @@ let listaActualDetalle = [];
 let indiceActualDetalle = -1;
 
 function abrirDetalle(p){
-  // Guardamos en qué lista y posición está, para poder deslizar al vecino
   listaActualDetalle = aplicarFiltroPrecio(ultimosResultados);
   indiceActualDetalle = listaActualDetalle.findIndex(x => x.id === p.id);
 
@@ -960,11 +1014,10 @@ function renderDetalleCompra(p){
   document.getElementById('o-compra').textContent = 'Cargando...';
 }
 
-/* ---------- DESLIZAR (swipe) para pasar al equipo siguiente/anterior ---------- */
 function irAVecino(direccion){
   if (!listaActualDetalle.length || indiceActualDetalle === -1) return;
   const nuevoIndice = indiceActualDetalle + direccion;
-  if (nuevoIndice < 0 || nuevoIndice >= listaActualDetalle.length) return; // ya es el primero/último
+  if (nuevoIndice < 0 || nuevoIndice >= listaActualDetalle.length) return;
 
   indiceActualDetalle = nuevoIndice;
   const p = listaActualDetalle[indiceActualDetalle];
@@ -991,10 +1044,8 @@ function activarSwipe(idContenedor){
   el.addEventListener('touchend', function(e){
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
-    // Solo cuenta como "deslizar" si el movimiento horizontal es claro
-    // y mayor que el vertical (para no chocar con el scroll normal)
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5){
-      irAVecino(dx < 0 ? 1 : -1); // izquierda = siguiente, derecha = anterior
+      irAVecino(dx < 0 ? 1 : -1);
     }
   }, { passive: true });
 }
@@ -1133,6 +1184,15 @@ function renderTablaComparativa(){
       <td style="padding:10px;text-align:center;${destacar}">${f[2]}</td>`;
     tbody.appendChild(tr);
   });
+
+  // Fila con botones "Vender" para cada equipo (A y B)
+  const trVender = document.createElement('tr');
+  trVender.style.borderTop = '1px solid var(--line)';
+  trVender.innerHTML = `
+    <td style="padding:10px;color:var(--ink-soft);"></td>
+    <td style="padding:10px 6px;text-align:center;"><button class="vender-mini-btn" onclick="venderDesdeComparar('A')">Vender</button></td>
+    <td style="padding:10px 6px;text-align:center;"><button class="vender-mini-btn" onclick="venderDesdeComparar('B')">Vender</button></td>`;
+  tbody.appendChild(trVender);
 }
 
 async function consultarPromoComparar(){
@@ -1216,6 +1276,133 @@ async function consultarPromo(){
   } finally {
     btn.disabled = false;
     btn.textContent = 'Buscar';
+  }
+}
+
+/* ================= PROCEDER A VENDER ================= */
+let ventaProducto = null;
+
+function abrirVender(p, precioSugerido){
+  if (!p) return;
+  ventaProducto = p;
+  document.getElementById('vender-equipo').textContent = p.marca + ' ' + p.modelo;
+  document.getElementById('vender-specs').textContent = p.capacidad + ' · ' + p.ram;
+  document.getElementById('venta-precio').value = (precioSugerido != null) ? precioSugerido : p.precioVenta;
+  document.getElementById('venta-dni').value = '';
+  document.getElementById('venta-nombre').value = '';
+  document.getElementById('venta-imei').value = '';
+  document.getElementById('venta-correo').value = '';
+  document.getElementById('venta-reniec-error').classList.remove('active');
+  const resBox = document.getElementById('venta-resultado');
+  resBox.classList.remove('active', 'error', 'exito');
+  resBox.textContent = '';
+
+  irA('screen-vender');
+}
+
+function venderDesdeComparar(cual){
+  const p = (cual === 'A') ? cmpA : cmpB;
+  abrirVender(p);
+}
+
+async function buscarClienteVenta(){
+  const dni = document.getElementById('venta-dni').value;
+  const errBox = document.getElementById('venta-reniec-error');
+  errBox.classList.remove('active', 'error', 'exito');
+
+  if (dni.length !== 8){
+    errBox.textContent = 'Ingresa un DNI válido de 8 dígitos.';
+    errBox.classList.add('active');
+    return;
+  }
+
+  const btn = document.getElementById('venta-btn-buscar-dni');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=reniec&dni=' + dni;
+    const data = await jsonpRequest(url);
+
+    if (data.error){
+      errBox.textContent = data.error + ' Puedes escribir el nombre manualmente.';
+      errBox.classList.add('active');
+    } else {
+      document.getElementById('venta-nombre').value = data.nombreCompleto;
+    }
+  } catch(e){
+    errBox.textContent = 'No se pudo conectar con RENIEC. Escribe el nombre manualmente.';
+    errBox.classList.add('active');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buscar';
+  }
+}
+
+async function enviarVenta(){
+  const dni = document.getElementById('venta-dni').value;
+  const nombreCliente = document.getElementById('venta-nombre').value.trim();
+  const precio = document.getElementById('venta-precio').value;
+  const imei = document.getElementById('venta-imei').value;
+  const correoCliente = document.getElementById('venta-correo').value.trim();
+  const resBox = document.getElementById('venta-resultado');
+  resBox.classList.remove('active', 'error', 'exito');
+
+  if (!ventaProducto){
+    resBox.textContent = 'No se encontró el equipo. Vuelve a intentarlo desde el detalle.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (imei.length !== 15){
+    resBox.textContent = 'El IMEI debe tener 15 dígitos.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (!precio){
+    resBox.textContent = 'Ingresa el precio acordado.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (!correoCliente){
+    resBox.textContent = 'Ingresa el correo del cliente.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('venta-btn-enviar');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  try{
+    const params = [
+      'action=enviarVenta',
+      'marca=' + encodeURIComponent(ventaProducto.marca),
+      'modelo=' + encodeURIComponent(ventaProducto.modelo),
+      'capacidad=' + encodeURIComponent(ventaProducto.capacidad),
+      'ram=' + encodeURIComponent(ventaProducto.ram),
+      'precio=' + encodeURIComponent(precio),
+      'imei=' + encodeURIComponent(imei),
+      'dni=' + encodeURIComponent(dni),
+      'nombreCliente=' + encodeURIComponent(nombreCliente),
+      'correoCliente=' + encodeURIComponent(correoCliente)
+    ].join('&');
+
+    const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
+    const data = await jsonpRequest(url, 15000);
+
+    if (data.error){
+      resBox.textContent = data.error;
+      resBox.classList.add('active', 'error');
+    } else {
+      resBox.textContent = '✅ Resumen enviado correctamente al correo del cliente.';
+      resBox.classList.add('active', 'exito');
+    }
+  } catch(e){
+    resBox.textContent = 'No se pudo conectar. Intenta de nuevo.';
+    resBox.classList.add('active', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar resumen';
   }
 }
 </script>
