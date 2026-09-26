@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{
     --ink:#0F1B2D;
@@ -326,6 +327,16 @@
     font-family:'Inter',sans-serif;
   }
   .vender-mini-btn:active{background:var(--accent-soft);}
+
+  /* Escáner de IMEI */
+  .scan-btn{
+    width:48px;height:48px;border-radius:12px;border:1px solid var(--line);
+    background:var(--card);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;flex-shrink:0;color:var(--ink);
+  }
+  .scan-btn:active{background:#F1F5F5;}
+  #reader{border-radius:14px;overflow:hidden;}
+  #reader video{border-radius:14px;}
 </style>
 </head>
 <body>
@@ -598,7 +609,17 @@
         </div>
         <div class="login-field">
           <label>IMEI del equipo (15 dígitos)</label>
-          <input id="venta-imei" type="tel" maxlength="15" placeholder="Ej: 356938035643809" oninput="this.value=this.value.replace(/\D/g,'').slice(0,15)">
+          <div style="display:flex;gap:8px;">
+            <input id="venta-imei" type="tel" maxlength="15" placeholder="Ej: 356938035643809" oninput="this.value=this.value.replace(/\D/g,'').slice(0,15)" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
+            <button type="button" class="scan-btn" onclick="abrirEscanerImei()" title="Escanear código de barras">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M20 8V6a2 2 0 00-2-2h-2M20 16v2a2 2 0 01-2 2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+          </div>
+          <p class="hint" style="margin-top:6px;">Toca el ícono de cámara y apunta al código de barras de la caja.</p>
+        </div>
+        <div class="login-field">
+          <label>Teléfono del cliente</label>
+          <input id="venta-telefono" type="tel" inputmode="numeric" maxlength="9" placeholder="Ej: 912854798" oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)">
         </div>
       </div>
 
@@ -646,6 +667,17 @@
       <div class="pin-actions">
         <button class="pin-cancel" onclick="closePin()">Cancelar</button>
         <button class="pin-confirm" onclick="checkPin()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pin-overlay" id="scanner-overlay">
+    <div class="pin-box" style="max-width:380px;">
+      <h3>Escanear IMEI</h3>
+      <p>Apunta la cámara al código de barras de la caja del equipo.</p>
+      <div id="reader" style="width:100%;min-height:200px;"></div>
+      <div class="pin-actions" style="margin-top:14px;">
+        <button class="pin-cancel" onclick="cerrarEscanerImei()">Cerrar</button>
       </div>
     </div>
   </div>
@@ -1291,6 +1323,7 @@ function abrirVender(p, precioSugerido){
   document.getElementById('venta-dni').value = '';
   document.getElementById('venta-nombre').value = '';
   document.getElementById('venta-imei').value = '';
+  document.getElementById('venta-telefono').value = '';
   document.getElementById('venta-correo').value = '';
   document.getElementById('venta-reniec-error').classList.remove('active');
   const resBox = document.getElementById('venta-resultado');
@@ -1344,6 +1377,7 @@ async function enviarVenta(){
   const nombreCliente = document.getElementById('venta-nombre').value.trim();
   const precio = document.getElementById('venta-precio').value;
   const imei = document.getElementById('venta-imei').value;
+  const telefono = document.getElementById('venta-telefono').value.trim();
   const correoCliente = document.getElementById('venta-correo').value.trim();
   const resBox = document.getElementById('venta-resultado');
   resBox.classList.remove('active', 'error', 'exito');
@@ -1383,6 +1417,7 @@ async function enviarVenta(){
       'precio=' + encodeURIComponent(precio),
       'imei=' + encodeURIComponent(imei),
       'dni=' + encodeURIComponent(dni),
+      'telefono=' + encodeURIComponent(telefono),
       'nombreCliente=' + encodeURIComponent(nombreCliente),
       'correoCliente=' + encodeURIComponent(correoCliente)
     ].join('&');
@@ -1403,6 +1438,53 @@ async function enviarVenta(){
   } finally {
     btn.disabled = false;
     btn.textContent = 'Enviar resumen';
+  }
+}
+
+/* ================= ESCÁNER DE IMEI (código de barras) ================= */
+let escanerImei = null;
+
+function abrirEscanerImei(){
+  document.getElementById('scanner-overlay').classList.add('active');
+  document.getElementById('reader').innerHTML = '';
+
+  escanerImei = new Html5Qrcode('reader');
+  const config = {
+    fps: 10,
+    qrbox: { width: 260, height: 120 },
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.QR_CODE
+    ]
+  };
+
+  escanerImei.start(
+    { facingMode: 'environment' },
+    config,
+    function(textoDetectado){
+      const soloDigitos = textoDetectado.replace(/\D/g, '');
+      if (soloDigitos.length >= 14){
+        document.getElementById('venta-imei').value = soloDigitos.slice(0, 15);
+        cerrarEscanerImei();
+      }
+    },
+    function(){ /* se ignoran los frames donde no se detecta nada */ }
+  ).catch(function(err){
+    alert('No se pudo acceder a la cámara: ' + err);
+    cerrarEscanerImei();
+  });
+}
+
+function cerrarEscanerImei(){
+  document.getElementById('scanner-overlay').classList.remove('active');
+  if (escanerImei){
+    escanerImei.stop().then(function(){
+      escanerImei.clear();
+      escanerImei = null;
+    }).catch(function(){ escanerImei = null; });
   }
 }
 </script>
