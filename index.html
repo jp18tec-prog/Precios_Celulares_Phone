@@ -7,29 +7,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{
-    --bg:#0B0D12;
-    --surface:#151822;
-    --surface-raised:#1B1F2B;
-    --ink:#F2F4F8;
-    --ink-soft:#8A93A6;
-    --paper:#0B0D12;
-    --card:#151822;
-    --line:rgba(255,255,255,.08);
-    --accent:#7C6FF0;
-    --accent-dark:#6152DA;
-    --accent-soft:rgba(124,111,240,.16);
-    --success:#33D17A;
-    --success-soft:rgba(51,209,122,.14);
-    --warn:#E2A23B;
-    --warn-soft:rgba(226,162,59,.14);
-    --danger:#F0665F;
-    --danger-soft:rgba(240,102,95,.14);
-    --radius:18px;
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
-    --checker:repeating-conic-gradient(from 0deg,rgba(255,255,255,.05) 0deg 90deg,rgba(255,255,255,.02) 90deg 180deg) 0 0/26px 26px;
+    --ink:#0F1B2D;
+    --ink-soft:#4B5A6B;
+    --paper:#F7F8FA;
+    --card:#FFFFFF;
+    --line:#E4E8EC;
+    --accent:#0EA5A0;
+    --accent-dark:#0B7F7B;
+    --accent-soft:#E3F6F5;
+    --warn:#D97A2B;
+    --warn-soft:#FBE9D9;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(15,27,45,.06), 0 8px 24px rgba(15,27,45,.06);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -39,7 +30,6 @@
     background:var(--paper);
     color:var(--ink);
     -webkit-font-smoothing:antialiased;
-    font-size:clamp(14px,3.6vw,16px);
     padding-top:env(safe-area-inset-top,0px);
     padding-bottom:env(safe-area-inset-bottom,0px);
   }
@@ -60,8 +50,7 @@
     align-items:center;
     gap:12px;
     padding:18px 20px 14px;
-    background:var(--surface-raised);
-    border-bottom:1px solid var(--line);
+    background:var(--ink);
     color:#fff;
     position:sticky;
     top:0;
@@ -70,8 +59,8 @@
   .topbar .back{
     width:34px;height:34px;
     border-radius:10px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.06);
     color:#fff;
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;
@@ -79,26 +68,25 @@
     font-size:18px;
     line-height:1;
   }
-  .topbar .back:active{background:rgba(255,255,255,.14);}
+  .topbar .back:active{background:rgba(255,255,255,.16);}
   .brand{display:flex;align-items:center;gap:10px;}
   .brand-mark{
     width:34px;height:34px;border-radius:9px;
-    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    background:var(--accent);
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
   }
   .brand-mark svg{width:18px;height:18px;}
-  .brand-mark svg path,.brand-mark svg circle{stroke:#fff !important;fill:#fff !important;}
   .brand-text{line-height:1.15;}
-  .brand-text .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(14px,4vw,16px);}
-  .brand-text .role{font-size:11px;color:rgba(255,255,255,.55);}
+  .brand-text .name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;}
+  .brand-text .role{font-size:11px;color:rgba(255,255,255,.6);}
 
   .screen{display:none;flex:1;flex-direction:column;}
   .screen.active{display:flex;}
 
   .home-hero{
     padding:32px 20px 28px;
-    background:radial-gradient(120% 140% at 100% 0%,#232A45 0%,var(--bg) 55%);
+    background:var(--ink);
     color:#fff;
     position:relative;
     overflow:hidden;
@@ -107,15 +95,15 @@
   .home-hero::before{
     content:"";position:absolute;right:-60px;top:-60px;
     width:220px;height:220px;border-radius:50%;
-    background:radial-gradient(circle,rgba(124,111,240,.45),transparent 70%);
+    background:radial-gradient(circle,rgba(14,165,160,.45),transparent 70%);
   }
   .home-hero::after{
     content:"";position:absolute;left:-40px;bottom:-80px;
     width:180px;height:180px;border-radius:50%;
-    background:radial-gradient(circle,rgba(51,209,122,.22),transparent 70%);
+    background:radial-gradient(circle,rgba(217,122,43,.25),transparent 70%);
   }
-  .home-hero .eyebrow{color:rgba(255,255,255,.6);font-size:13px;margin:0 0 6px;position:relative;}
-  .home-hero h1{font-size:clamp(21px,6.4vw,27px);margin:0;font-weight:700;letter-spacing:-.01em;position:relative;line-height:1.3;}
+  .home-hero .eyebrow{color:rgba(255,255,255,.65);font-size:13px;margin:0 0 6px;position:relative;}
+  .home-hero h1{font-size:25px;margin:0;font-weight:700;letter-spacing:-.01em;position:relative;line-height:1.3;}
   .home-cards{padding:22px 20px 28px;display:flex;flex-direction:column;gap:14px;flex:1;margin-top:-18px;}
   .choice-card{
     background:var(--card);
@@ -126,13 +114,13 @@
     align-items:center;
     gap:16px;
     cursor:pointer;
-    box-shadow:var(--shadow);
+    box-shadow:0 2px 4px rgba(15,27,45,.05), 0 12px 28px rgba(15,27,45,.08);
     transition:transform .12s ease, border-color .12s ease;
     text-align:left;
     position:relative;
   }
   .choice-card:active{transform:scale(.98);}
-  .choice-card.primary{border-color:rgba(124,111,240,.4);}
+  .choice-card.primary{border-color:var(--accent);}
   .choice-card.primary::before{
     content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;
     background:var(--accent);border-radius:0 4px 4px 0;
@@ -142,15 +130,15 @@
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
   }
-  .choice-card.primary .choice-icon{background:var(--accent-soft);color:#B4ABF7;}
-  .choice-card.secondary .choice-icon{background:var(--warn-soft);color:#F0C98A;}
+  .choice-card.primary .choice-icon{background:linear-gradient(135deg,var(--accent-soft),#fff);color:var(--accent-dark);}
+  .choice-card.secondary .choice-icon{background:linear-gradient(135deg,#F1EEE8,#fff);color:#7A6A4E;}
   .choice-icon svg{width:26px;height:26px;}
-  .choice-body h3{margin:0 0 3px;font-size:clamp(15px,4vw,17px);}
+  .choice-body h3{margin:0 0 3px;font-size:17px;}
   .choice-body p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.4;}
   .choice-arrow{color:var(--ink-soft);font-size:18px;flex-shrink:0;}
   .lock-tag{
-    margin-left:auto;font-size:11px;color:#F0C98A;
-    background:var(--warn-soft);padding:3px 8px;border-radius:20px;
+    margin-left:auto;font-size:11px;color:#7A6A4E;
+    background:#F1EEE8;padding:3px 8px;border-radius:20px;
     flex-shrink:0;white-space:nowrap;
   }
   .home-footer{padding:0 20px 20px;text-align:center;font-size:11.5px;color:var(--ink-soft);}
@@ -167,21 +155,20 @@
     border:none;outline:none;background:transparent;
     font-size:15px;width:100%;font-family:'Inter',sans-serif;color:var(--ink);
   }
-  .search-box input::placeholder{color:var(--ink-soft);}
   .results-count{padding:0 20px;font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
   .results-list{padding:0 20px 24px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto;}
   .result-card{
     background:var(--card);border:1px solid var(--line);border-radius:14px;
     padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;
-    cursor:pointer;transition:border-color .12s ease, background .12s ease;
+    cursor:pointer;
   }
-  .result-card:active{background:var(--surface-raised);border-color:rgba(124,111,240,.35);}
+  .result-card:active{background:#F1F5F5;}
   .result-info .brand-tag{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
   .result-info .model-name{font-weight:600;font-size:14.5px;margin:2px 0;}
   .result-info .specs{font-size:12px;color:var(--ink-soft);}
   .result-price{text-align:right;flex-shrink:0;}
   .result-price .num{font-size:17px;font-weight:700;color:var(--ink);}
-  .result-price .cta{font-size:11px;color:#B4ABF7;}
+  .result-price .cta{font-size:11px;color:var(--accent-dark);}
 
   .empty-state{padding:40px 24px;text-align:center;color:var(--ink-soft);}
   .empty-state .big-emoji{font-size:32px;margin-bottom:8px;}
@@ -189,32 +176,31 @@
 
   .detail-body{padding:22px 20px;flex:1;display:flex;flex-direction:column;gap:20px;}
   .detail-head .brand-tag{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
-  .detail-head h2{margin:4px 0 6px;font-size:clamp(19px,5.6vw,23px);line-height:1.25;}
-  .detail-head .specs-row{display:flex;gap:8px;flex-wrap:wrap;}
-  .spec-pill{background:var(--surface-raised);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12.5px;color:var(--ink-soft);}
+  .detail-head h2{margin:4px 0 6px;font-size:22px;line-height:1.25;}
+  .detail-head .specs-row{display:flex;gap:8px;}
+  .spec-pill{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12.5px;color:var(--ink-soft);}
 
   .price-panel{
-    background:linear-gradient(135deg,var(--surface-raised),var(--surface));
-    color:#fff;border-radius:20px;border:1px solid var(--line);
+    background:var(--ink);color:#fff;border-radius:20px;
     padding:24px 22px;position:relative;overflow:hidden;
   }
   .price-panel::after{
     content:"";position:absolute;right:-40px;top:-40px;
     width:140px;height:140px;border-radius:50%;
-    background:radial-gradient(circle,rgba(124,111,240,.45),transparent 70%);
+    background:radial-gradient(circle,rgba(14,165,160,.35),transparent 70%);
   }
-  .price-panel .label{font-size:12.5px;color:rgba(255,255,255,.55);margin-bottom:6px;position:relative;}
-  .price-panel .price{font-size:clamp(30px,9vw,40px);font-weight:700;letter-spacing:-.01em;position:relative;}
-  .price-panel .price small{font-size:60%;font-weight:600;vertical-align:2px;}
+  .price-panel .label{font-size:12.5px;color:rgba(255,255,255,.6);margin-bottom:6px;position:relative;}
+  .price-panel .price{font-size:38px;font-weight:700;letter-spacing:-.01em;position:relative;}
+  .price-panel .price small{font-size:17px;font-weight:600;vertical-align:2px;}
 
   .promo-toggle{
-    background:var(--accent-soft);color:#C7BFFB;
-    border:1px solid transparent;border-radius:14px;padding:15px;
+    background:var(--accent-soft);color:var(--accent-dark);
+    border:none;border-radius:14px;padding:15px;
     font-family:'Inter',sans-serif;font-weight:600;font-size:14.5px;
     display:flex;align-items:center;justify-content:center;gap:8px;
     cursor:pointer;
   }
-  .promo-toggle:active{background:rgba(124,111,240,.28);}
+  .promo-toggle:active{background:#D2EDEB;}
 
   .promo-panel{
     background:var(--card);border:1px solid var(--line);border-radius:18px;
@@ -225,13 +211,13 @@
   .promo-panel .hint{font-size:12.5px;color:var(--ink-soft);margin-top:-8px;}
   .dni-row{display:flex;gap:8px;}
   .dni-row input{
-    flex:1;border:1px solid var(--line);border-radius:12px;background:var(--surface-raised);color:var(--ink);
+    flex:1;border:1px solid var(--line);border-radius:12px;
     padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;
     outline:none;
   }
   .dni-row input:focus{border-color:var(--accent);}
   .btn-check{
-    background:var(--accent);color:#fff;border:none;border-radius:12px;
+    background:var(--ink);color:#fff;border:none;border-radius:12px;
     padding:0 18px;font-weight:600;font-size:14px;cursor:pointer;
     font-family:'Inter',sans-serif;
   }
@@ -242,80 +228,78 @@
   .client-name{font-size:13px;color:var(--ink-soft);}
   .client-name strong{color:var(--ink);}
   .offer-box{
-    background:var(--success-soft);border:1px dashed rgba(51,209,122,.5);border-radius:14px;
+    background:var(--warn-soft);border:1px dashed var(--warn);border-radius:14px;
     padding:16px;text-align:center;
   }
   .offer-box .was{font-size:13px;color:var(--ink-soft);text-decoration:line-through;}
-  .offer-box .now{font-size:clamp(24px,7vw,30px);font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
-  .offer-box .save{font-size:12.5px;color:var(--success);font-weight:600;margin-top:2px;}
+  .offer-box .now{font-size:30px;font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
+  .offer-box .save{font-size:12.5px;color:var(--warn);font-weight:600;margin-top:2px;}
   .promo-error{
-    background:var(--surface-raised);color:var(--ink-soft);border:1px solid var(--line);border-radius:12px;
+    background:#F1F0EC;color:var(--ink-soft);border:1px solid var(--line);border-radius:12px;
     padding:12px 14px;font-size:13px;display:none;
     align-items:center;gap:8px;
   }
   .promo-error.active{display:flex;}
-  .promo-error.error{background:var(--danger-soft);color:#FF9F98;border-color:rgba(240,102,95,.35);}
-  .promo-error.exito{background:var(--success-soft);color:#7FE8AC;border-color:rgba(51,209,122,.35);}
 
   .pin-overlay{
-    position:fixed;inset:0;background:rgba(4,5,8,.72);
+    position:fixed;inset:0;background:rgba(15,27,45,.55);
     display:none;align-items:center;justify-content:center;padding:24px;z-index:50;
   }
   .pin-overlay.active{display:flex;}
-  .pin-box{background:var(--surface-raised);border:1px solid var(--line);border-radius:18px;padding:24px;width:100%;max-width:340px;}
-  .pin-box h3{margin:0 0 6px;font-size:17px;color:var(--ink);}
+  .pin-box{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:340px;}
+  .pin-box h3{margin:0 0 6px;font-size:17px;}
   .pin-box p{margin:0 0 16px;font-size:13px;color:var(--ink-soft);}
   .pin-box input{
-    width:100%;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);
+    width:100%;border:1px solid var(--line);border-radius:12px;
     padding:12px 14px;font-size:16px;letter-spacing:4px;text-align:center;
     outline:none;margin-bottom:12px;
   }
   .pin-actions{display:flex;gap:10px;}
   .pin-actions button{flex:1;border:none;border-radius:12px;padding:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;}
-  .pin-cancel{background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);}
-  .pin-confirm{background:var(--accent);color:#fff;}
+  .pin-cancel{background:var(--paper);color:var(--ink-soft);}
+  .pin-confirm{background:var(--ink);color:#fff;}
 
   .owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .owner-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
   .owner-box .k{font-size:11.5px;color:var(--ink-soft);margin-bottom:4px;}
-  .owner-box .v{font-size:clamp(15px,4.4vw,17px);font-weight:700;color:var(--ink);}
-  .owner-box.margin .v{color:var(--success);}
+  .owner-box .v{font-size:17px;font-weight:700;}
+  .owner-box.margin .v{color:var(--accent-dark);}
 
   .desktop-block{
     min-height:100vh;display:flex;align-items:center;justify-content:center;
     flex-direction:column;text-align:center;padding:40px 24px;
-    background:var(--bg);color:#fff;
+    background:var(--ink);color:#fff;
   }
   .desktop-block .icon{font-size:44px;margin-bottom:16px;}
-  .desktop-block h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(19px,5.6vw,22px);margin:0 0 10px;}
-  .desktop-block p{color:rgba(255,255,255,.65);font-size:14.5px;max-width:320px;line-height:1.5;margin:0;}
+  .desktop-block h2{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 10px;}
+  .desktop-block p{color:rgba(255,255,255,.7);font-size:14.5px;max-width:320px;line-height:1.5;margin:0;}
 
   /* Login general de la app */
   .login-block{
     min-height:100vh;display:flex;align-items:center;justify-content:center;
-    padding:32px 24px;background:radial-gradient(120% 100% at 50% 0%,#1B2036 0%,var(--bg) 60%);
+    padding:32px 24px;background:var(--ink);
   }
   .login-card{
-    background:var(--surface-raised);border:1px solid var(--line);border-radius:22px;padding:28px 24px;
-    width:100%;max-width:360px;box-shadow:0 20px 50px rgba(0,0,0,.5);
+    background:var(--card);border-radius:22px;padding:28px 24px;
+    width:100%;max-width:360px;box-shadow:0 20px 50px rgba(0,0,0,.35);
   }
   .login-card .brand-mark{margin:0 auto 16px;}
-  .login-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px;text-align:center;color:var(--ink);}
+  .login-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px;text-align:center;}
   .login-card p{font-size:13px;color:var(--ink-soft);text-align:center;margin:0 0 22px;}
   .login-field{margin-bottom:12px;}
   .login-field label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:5px;}
   .login-field input{
-    width:100%;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);
+    width:100%;border:1px solid var(--line);border-radius:12px;
     padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;
   }
   .login-field input:focus{border-color:var(--accent);}
   .login-btn{
-    width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;
+    width:100%;background:var(--ink);color:#fff;border:none;border-radius:12px;
     padding:13px;font-weight:600;font-size:14.5px;cursor:pointer;margin-top:8px;
     font-family:'Inter',sans-serif;
   }
   .login-error{
-    background:var(--danger-soft);color:#FF9F98;border-radius:10px;padding:10px 12px;
+    background:#FDECEC;color:#B3261E;border-radius:10px;padding:10px 12px;
     font-size:12.5px;margin-top:10px;display:none;text-align:center;
   }
   .login-error.active{display:block;}
@@ -331,30 +315,7 @@
     border-radius:20px;padding:7px 14px;font-size:12.5px;color:var(--ink-soft);
     cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;
   }
-  .price-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-
-  /* Vender: mini botón en tabla comparativa */
-  .vender-mini-btn{
-    background:transparent;border:1.5px solid var(--accent);color:#C7BFFB;
-    border-radius:20px;padding:6px 16px;font-weight:700;font-size:12.5px;cursor:pointer;
-    font-family:'Inter',sans-serif;
-  }
-  .vender-mini-btn:active{background:var(--accent-soft);}
-
-  /* Escáner de IMEI */
-  .scan-btn{
-    width:48px;height:48px;border-radius:12px;border:1px solid var(--line);
-    background:var(--card);display:flex;align-items:center;justify-content:center;
-    cursor:pointer;flex-shrink:0;color:var(--ink);
-  }
-  .scan-btn:active{background:var(--surface-raised);}
-  #reader{border-radius:14px;overflow:hidden;}
-  #reader video{border-radius:14px;}
-
-  @media (max-width:340px){
-    .home-cards,.detail-body,.results-list{padding-left:16px;padding-right:16px;}
-    .choice-icon{width:46px;height:46px;}
-  }
+  .price-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 </style>
 </head>
 <body>
@@ -431,7 +392,7 @@
         <span class="lock-tag">🔒 Privado</span>
       </div>
     </div>
-    <div class="home-footer">Precios Better · uso interno</div>
+    <div class="home-footer">Francell Store · uso interno</div>
   </section>
 
   <section id="screen-search" class="screen">
@@ -477,7 +438,7 @@
         </div>
       </div>
 
-      <img id="d-foto" src="" loading="lazy" style="width:100%;max-height:220px;object-fit:contain;background:var(--checker),#12151d;border-radius:16px;padding:10px;">
+      <img id="d-foto" src="" loading="lazy" style="width:100%;max-height:220px;object-fit:contain;background:#F1F0EC;border-radius:16px;padding:10px;">
       <p id="d-swipe-hint" style="text-align:center;font-size:11.5px;color:var(--ink-soft);margin:-8px 0 0;">← Desliza para ver otro equipo →</p>
 
       <div class="owner-grid" id="d-specs-grid">
@@ -498,12 +459,8 @@
         🎁 Ver si tiene promoción disponible
       </button>
 
-      <button class="promo-toggle" style="background:rgba(56,132,255,.14);color:#8FC0FF;" onclick="abrirComparar()">
+      <button class="promo-toggle" style="background:#ECEAF6;color:#4C3F91;" onclick="abrirComparar()">
         ⚖️ Comparar con otro modelo
-      </button>
-
-      <button class="promo-toggle" style="background:var(--accent);color:#fff;" onclick="abrirVender(productoActual)">
-        🧾 Proceder a vender
       </button>
 
       <div class="promo-panel" id="promo-panel">
@@ -548,7 +505,7 @@
       <div id="compare-table-wrap" style="display:none;">
         <table id="compare-table" style="width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;">
           <thead>
-            <tr style="background:var(--surface-raised);color:#fff;border-bottom:1px solid var(--line);">
+            <tr style="background:var(--ink);color:#fff;">
               <th style="padding:12px 10px;text-align:left;font-size:12px;width:30%;">Especificación</th>
               <th id="cmp-head-a" style="padding:12px 8px;text-align:center;font-size:12.5px;">A</th>
               <th id="cmp-head-b" style="padding:12px 8px;text-align:center;font-size:12.5px;">B</th>
@@ -589,69 +546,6 @@
     </div>
   </section>
 
-  <!-- ===================== PROCEDER A VENDER ===================== -->
-  <section id="screen-vender" class="screen">
-    <div class="topbar">
-      <div class="back" onclick="history.back()">‹</div>
-      <div class="brand-text">
-        <div class="name" style="font-size:15px;">Proceder a vender</div>
-      </div>
-    </div>
-    <div class="detail-body">
-      <div class="detail-head">
-        <div class="brand-tag">EQUIPO</div>
-        <h2 id="vender-equipo">-</h2>
-        <div class="specs-row">
-          <span class="spec-pill" id="vender-specs">-</span>
-        </div>
-      </div>
-
-      <div class="promo-panel active">
-        <h4>Datos del cliente</h4>
-        <div class="dni-row">
-          <input id="venta-dni" type="tel" maxlength="8" placeholder="DNI del cliente" oninput="this.value=this.value.replace(/\D/g,'')">
-          <button class="btn-check" id="venta-btn-buscar-dni" onclick="buscarClienteVenta()">Buscar</button>
-        </div>
-        <div class="promo-error" id="venta-reniec-error"></div>
-        <div class="login-field" style="margin-top:6px;">
-          <label>Nombre del cliente</label>
-          <input id="venta-nombre" type="text" placeholder="Se autocompleta o escríbelo tú">
-        </div>
-      </div>
-
-      <div class="promo-panel active">
-        <h4>Datos de la venta</h4>
-        <div class="login-field">
-          <label>Precio acordado (S/)</label>
-          <input id="venta-precio" type="number" placeholder="0">
-        </div>
-        <div class="login-field">
-          <label>IMEI del equipo (15 dígitos)</label>
-          <div style="display:flex;gap:8px;">
-            <input id="venta-imei" type="tel" maxlength="15" placeholder="Ej: 356938035643809" oninput="this.value=this.value.replace(/\D/g,'').slice(0,15)" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
-            <button type="button" class="scan-btn" onclick="abrirEscanerImei()" title="Escanear código de barras">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M20 8V6a2 2 0 00-2-2h-2M20 16v2a2 2 0 01-2 2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/></svg>
-            </button>
-          </div>
-          <p class="hint" style="margin-top:6px;">Toca el ícono de cámara y apunta al código de barras de la caja.</p>
-        </div>
-        <div class="login-field">
-          <label>Teléfono del cliente</label>
-          <input id="venta-telefono" type="tel" inputmode="numeric" maxlength="9" placeholder="Ej: 912854798" oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)">
-        </div>
-      </div>
-
-      <div class="promo-panel active">
-        <h4>📧 Correo del cliente</h4>
-        <p class="hint">Ahí le llegará el resumen de su compra.</p>
-        <input id="venta-correo" type="email" placeholder="correo@ejemplo.com" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
-      </div>
-
-      <button class="btn-check" id="venta-btn-enviar" style="width:100%;padding:15px;border-radius:14px;font-size:15px;" onclick="enviarVenta()">Enviar resumen</button>
-      <div class="promo-error" id="venta-resultado"></div>
-    </div>
-  </section>
-
   <section id="screen-owner" class="screen">
     <div class="topbar">
       <div class="back" onclick="history.back()">‹</div>
@@ -689,17 +583,6 @@
     </div>
   </div>
 
-  <div class="pin-overlay" id="scanner-overlay">
-    <div class="pin-box" style="max-width:380px;">
-      <h3>Escanear IMEI</h3>
-      <p>Apunta la cámara al código de barras de la caja del equipo.</p>
-      <div id="reader" style="width:100%;min-height:200px;"></div>
-      <div class="pin-actions" style="margin-top:14px;">
-        <button class="pin-cancel" onclick="cerrarEscanerImei()">Cerrar</button>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -710,13 +593,13 @@ const CONFIG = {
   // (vacío "" porque tus fotos quedaron en la raíz del repositorio, no en una subcarpeta)
   CARPETA_IMAGENES: "",
   // Usuario y contraseña para entrar a TODA la app (cámbialos por los tuyos)
-  LOGIN_USUARIO: "admin",
-  LOGIN_PASSWORD: "767698"
+  LOGIN_USUARIO: "francell",
+  LOGIN_PASSWORD: "francell2026"
 };
 
 // Ícono de respaldo (SVG) cuando un modelo todavía no tiene foto subida
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#1B1F2B"/><path d="M35 20h30a5 5 0 015 5v50a5 5 0 01-5 5H35a5 5 0 01-5-5V25a5 5 0 015-5z" fill="none" stroke="#4A5062" stroke-width="3"/><circle cx="50" cy="70" r="3" fill="#4A5062"/></svg>`
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#F1F0EC"/><path d="M35 20h30a5 5 0 015 5v50a5 5 0 01-5 5H35a5 5 0 01-5-5V25a5 5 0 015-5z" fill="none" stroke="#B9B4A8" stroke-width="3"/><circle cx="50" cy="70" r="3" fill="#B9B4A8"/></svg>`
 );
 
 function rutaImagen(nombreArchivo){
@@ -828,7 +711,11 @@ function goHome(){
   try{ sessionStorage.removeItem('fs_ultima_pantalla'); }catch(e){}
 }
 
-/* ---------- NAVEGACIÓN CON HISTORIAL (botón atrás físico del celular) ---------- */
+/* ---------- NAVEGACIÓN CON HISTORIAL (botón atrás físico del celular) ----------
+   Cada vez que entramos a una pantalla nueva, la registramos en el historial
+   del navegador. Así, cuando el cliente usa el botón/gesto de "atrás" del
+   celular, en vez de salirse de la página, retrocede dentro de la app,
+   pantalla por pantalla, hasta llegar a Inicio (recién ahí sí sale). */
 function irA(id){
   try { history.pushState({ screen: id }, '', '#' + id); } catch(e){}
   showScreen(id);
@@ -844,6 +731,10 @@ window.addEventListener('popstate', function(e){
   guardarUltimaPantalla();
 });
 
+/* ---------- RECORDAR LA ÚLTIMA PANTALLA (para que un refresh no te mande a Inicio) ----------
+   Guardamos SOLO en la memoria de esta pestaña (sessionStorage), no en el servidor.
+   Si el cliente cierra el navegador del todo, se olvida y arranca de Inicio de nuevo
+   la próxima vez — eso es intencional, para que un cliente nuevo siempre parta limpio. */
 function guardarUltimaPantalla(){
   try{
     const pantallaActiva = document.querySelector('.screen.active');
@@ -873,13 +764,16 @@ async function restaurarUltimaPantalla(){
       const url = CONFIG.APPS_SCRIPT_URL + '?action=detalle&id=' + encodeURIComponent(guardado.productoId);
       const data = await jsonpRequest(url);
       if (data.producto){
+        // Reconstruimos el "camino" (Inicio → Buscar → Detalle) para que el
+        // botón atrás siga funcionando normal después de restaurar.
         goSearch(modo);
         await buscarModelos('');
         abrirDetalle(data.producto);
       }
-    } catch(e){ }
+    } catch(e){ /* si falla, simplemente se queda en Inicio, sin romper nada */ }
     return;
   }
+  // "screen-compare" no se restaura (necesitaría 2 productos): se queda en Inicio.
 }
 
 function goSearch(m){
@@ -975,7 +869,7 @@ function renderResultados(resultados){
     const precioMostrar = modo === 'venta' ? p.precioVenta : p.precioVenta;
     card.innerHTML = `
       <img src="${rutaImagen(p.imagen)}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'"
-           style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--checker),#12151d;">
+           style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#F1F0EC;">
       <div class="result-info">
         <div class="brand-tag">${p.marca}</div>
         <div class="model-name">${p.modelo}</div>
@@ -990,6 +884,7 @@ function renderResultados(resultados){
   });
 }
 
+/* ---------- FILTRO DE PRECIO ---------- */
 function resetFiltroPrecio(){
   filtroPrecioActivo = 'todos';
   document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('active'));
@@ -1014,6 +909,7 @@ let listaActualDetalle = [];
 let indiceActualDetalle = -1;
 
 function abrirDetalle(p){
+  // Guardamos en qué lista y posición está, para poder deslizar al vecino
   listaActualDetalle = aplicarFiltroPrecio(ultimosResultados);
   indiceActualDetalle = listaActualDetalle.findIndex(x => x.id === p.id);
 
@@ -1064,10 +960,11 @@ function renderDetalleCompra(p){
   document.getElementById('o-compra').textContent = 'Cargando...';
 }
 
+/* ---------- DESLIZAR (swipe) para pasar al equipo siguiente/anterior ---------- */
 function irAVecino(direccion){
   if (!listaActualDetalle.length || indiceActualDetalle === -1) return;
   const nuevoIndice = indiceActualDetalle + direccion;
-  if (nuevoIndice < 0 || nuevoIndice >= listaActualDetalle.length) return;
+  if (nuevoIndice < 0 || nuevoIndice >= listaActualDetalle.length) return; // ya es el primero/último
 
   indiceActualDetalle = nuevoIndice;
   const p = listaActualDetalle[indiceActualDetalle];
@@ -1094,8 +991,10 @@ function activarSwipe(idContenedor){
   el.addEventListener('touchend', function(e){
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
+    // Solo cuenta como "deslizar" si el movimiento horizontal es claro
+    // y mayor que el vertical (para no chocar con el scroll normal)
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5){
-      irAVecino(dx < 0 ? 1 : -1);
+      irAVecino(dx < 0 ? 1 : -1); // izquierda = siguiente, derecha = anterior
     }
   }, { passive: true });
 }
@@ -1216,13 +1115,13 @@ function renderTablaComparativa(){
   filas.forEach((f, i) => {
     const tr = document.createElement('tr');
     tr.style.borderTop = '1px solid var(--line)';
-    if (i % 2 === 1) tr.style.background = 'rgba(255,255,255,.03)';
+    if (i % 2 === 1) tr.style.background = '#FAFAFA';
 
     if (f[0] === '__foto__'){
       tr.innerHTML = `
         <td style="padding:10px;color:var(--ink-soft);">Foto</td>
-        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[1])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:var(--checker),#12151d;border-radius:8px;"></td>
-        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[2])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:var(--checker),#12151d;border-radius:8px;"></td>`;
+        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[1])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:#F1F0EC;border-radius:8px;"></td>
+        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[2])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:#F1F0EC;border-radius:8px;"></td>`;
       tbody.appendChild(tr);
       return;
     }
@@ -1234,15 +1133,6 @@ function renderTablaComparativa(){
       <td style="padding:10px;text-align:center;${destacar}">${f[2]}</td>`;
     tbody.appendChild(tr);
   });
-
-  // Fila con botones "Vender" para cada equipo (A y B)
-  const trVender = document.createElement('tr');
-  trVender.style.borderTop = '1px solid var(--line)';
-  trVender.innerHTML = `
-    <td style="padding:10px;color:var(--ink-soft);"></td>
-    <td style="padding:10px 6px;text-align:center;"><button class="vender-mini-btn" onclick="venderDesdeComparar('A')">Vender</button></td>
-    <td style="padding:10px 6px;text-align:center;"><button class="vender-mini-btn" onclick="venderDesdeComparar('B')">Vender</button></td>`;
-  tbody.appendChild(trVender);
 }
 
 async function consultarPromoComparar(){
@@ -1326,183 +1216,6 @@ async function consultarPromo(){
   } finally {
     btn.disabled = false;
     btn.textContent = 'Buscar';
-  }
-}
-
-/* ================= PROCEDER A VENDER ================= */
-let ventaProducto = null;
-
-function abrirVender(p, precioSugerido){
-  if (!p) return;
-  ventaProducto = p;
-  document.getElementById('vender-equipo').textContent = p.marca + ' ' + p.modelo;
-  document.getElementById('vender-specs').textContent = p.capacidad + ' · ' + p.ram;
-  document.getElementById('venta-precio').value = (precioSugerido != null) ? precioSugerido : p.precioVenta;
-  document.getElementById('venta-dni').value = '';
-  document.getElementById('venta-nombre').value = '';
-  document.getElementById('venta-imei').value = '';
-  document.getElementById('venta-telefono').value = '';
-  document.getElementById('venta-correo').value = '';
-  document.getElementById('venta-reniec-error').classList.remove('active');
-  const resBox = document.getElementById('venta-resultado');
-  resBox.classList.remove('active', 'error', 'exito');
-  resBox.textContent = '';
-
-  irA('screen-vender');
-}
-
-function venderDesdeComparar(cual){
-  const p = (cual === 'A') ? cmpA : cmpB;
-  abrirVender(p);
-}
-
-async function buscarClienteVenta(){
-  const dni = document.getElementById('venta-dni').value;
-  const errBox = document.getElementById('venta-reniec-error');
-  errBox.classList.remove('active', 'error', 'exito');
-
-  if (dni.length !== 8){
-    errBox.textContent = 'Ingresa un DNI válido de 8 dígitos.';
-    errBox.classList.add('active');
-    return;
-  }
-
-  const btn = document.getElementById('venta-btn-buscar-dni');
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  try{
-    const url = CONFIG.APPS_SCRIPT_URL + '?action=reniec&dni=' + dni;
-    const data = await jsonpRequest(url);
-
-    if (data.error){
-      errBox.textContent = data.error + ' Puedes escribir el nombre manualmente.';
-      errBox.classList.add('active');
-    } else {
-      document.getElementById('venta-nombre').value = data.nombreCompleto;
-    }
-  } catch(e){
-    errBox.textContent = 'No se pudo conectar con RENIEC. Escribe el nombre manualmente.';
-    errBox.classList.add('active');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Buscar';
-  }
-}
-
-async function enviarVenta(){
-  const dni = document.getElementById('venta-dni').value;
-  const nombreCliente = document.getElementById('venta-nombre').value.trim();
-  const precio = document.getElementById('venta-precio').value;
-  const imei = document.getElementById('venta-imei').value;
-  const telefono = document.getElementById('venta-telefono').value.trim();
-  const correoCliente = document.getElementById('venta-correo').value.trim();
-  const resBox = document.getElementById('venta-resultado');
-  resBox.classList.remove('active', 'error', 'exito');
-
-  if (!ventaProducto){
-    resBox.textContent = 'No se encontró el equipo. Vuelve a intentarlo desde el detalle.';
-    resBox.classList.add('active', 'error');
-    return;
-  }
-  if (imei.length !== 15){
-    resBox.textContent = 'El IMEI debe tener 15 dígitos.';
-    resBox.classList.add('active', 'error');
-    return;
-  }
-  if (!precio){
-    resBox.textContent = 'Ingresa el precio acordado.';
-    resBox.classList.add('active', 'error');
-    return;
-  }
-  if (!correoCliente){
-    resBox.textContent = 'Ingresa el correo del cliente.';
-    resBox.classList.add('active', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('venta-btn-enviar');
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
-
-  try{
-    const params = [
-      'action=enviarVenta',
-      'marca=' + encodeURIComponent(ventaProducto.marca),
-      'modelo=' + encodeURIComponent(ventaProducto.modelo),
-      'capacidad=' + encodeURIComponent(ventaProducto.capacidad),
-      'ram=' + encodeURIComponent(ventaProducto.ram),
-      'precio=' + encodeURIComponent(precio),
-      'imei=' + encodeURIComponent(imei),
-      'dni=' + encodeURIComponent(dni),
-      'telefono=' + encodeURIComponent(telefono),
-      'nombreCliente=' + encodeURIComponent(nombreCliente),
-      'correoCliente=' + encodeURIComponent(correoCliente)
-    ].join('&');
-
-    const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
-    const data = await jsonpRequest(url, 15000);
-
-    if (data.error){
-      resBox.textContent = data.error;
-      resBox.classList.add('active', 'error');
-    } else {
-      resBox.textContent = '✅ Resumen enviado correctamente al correo del cliente.';
-      resBox.classList.add('active', 'exito');
-    }
-  } catch(e){
-    resBox.textContent = 'No se pudo conectar. Intenta de nuevo.';
-    resBox.classList.add('active', 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Enviar resumen';
-  }
-}
-
-/* ================= ESCÁNER DE IMEI (código de barras) ================= */
-let escanerImei = null;
-
-function abrirEscanerImei(){
-  document.getElementById('scanner-overlay').classList.add('active');
-  document.getElementById('reader').innerHTML = '';
-
-  escanerImei = new Html5Qrcode('reader');
-  const config = {
-    fps: 10,
-    qrbox: { width: 260, height: 120 },
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.QR_CODE
-    ]
-  };
-
-  escanerImei.start(
-    { facingMode: 'environment' },
-    config,
-    function(textoDetectado){
-      const soloDigitos = textoDetectado.replace(/\D/g, '');
-      if (soloDigitos.length >= 14){
-        document.getElementById('venta-imei').value = soloDigitos.slice(0, 15);
-        cerrarEscanerImei();
-      }
-    },
-    function(){ /* se ignoran los frames donde no se detecta nada */ }
-  ).catch(function(err){
-    alert('No se pudo acceder a la cámara: ' + err);
-    cerrarEscanerImei();
-  });
-}
-
-function cerrarEscanerImei(){
-  document.getElementById('scanner-overlay').classList.remove('active');
-  if (escanerImei){
-    escanerImei.stop().then(function(){
-      escanerImei.clear();
-      escanerImei = null;
-    }).catch(function(){ escanerImei = null; });
   }
 }
 </script>
