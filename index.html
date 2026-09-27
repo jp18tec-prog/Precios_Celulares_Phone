@@ -2,25 +2,37 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Precios Better</title>
+<title>Better Comunication</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
   :root{
-    --ink:#0F1B2D;
-    --ink-soft:#4B5A6B;
-    --paper:#F7F8FA;
-    --card:#FFFFFF;
-    --line:#E4E8EC;
-    --accent:#0EA5A0;
-    --accent-dark:#0B7F7B;
-    --accent-soft:#E3F6F5;
-    --warn:#D97A2B;
-    --warn-soft:#FBE9D9;
+    --bg:#0A0C10;
+    --bg-soft:#0F1218;
+    --surface:#15181F;
+    --surface-2:#1C202A;
+    --line:#262B36;
+    --text:#F2F4F7;
+    --text-soft:#9AA3B2;
+    --accent:#22E0C8;
+    --accent-dark:#0FA893;
+    --accent-soft:rgba(34,224,200,.12);
+    --warn:#FDBA4D;
+    --warn-soft:rgba(253,186,77,.12);
+    --danger:#FF6B6B;
+    --danger-soft:rgba(255,107,107,.12);
+    --success:#3DDC84;
+    --success-soft:rgba(61,220,132,.12);
     --radius:16px;
-    --shadow:0 1px 2px rgba(15,27,45,.06), 0 8px 24px rgba(15,27,45,.06);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    /* alias de compatibilidad con nombres anteriores */
+    --ink:var(--text);
+    --ink-soft:var(--text-soft);
+    --paper:var(--bg);
+    --card:var(--surface);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -50,7 +62,7 @@
     align-items:center;
     gap:12px;
     padding:18px 20px 14px;
-    background:var(--ink);
+    background:var(--surface-2);border-bottom:1px solid var(--line);
     color:#fff;
     position:sticky;
     top:0;
@@ -86,7 +98,7 @@
 
   .home-hero{
     padding:32px 20px 28px;
-    background:var(--ink);
+    background:var(--bg);
     color:#fff;
     position:relative;
     overflow:hidden;
@@ -95,12 +107,12 @@
   .home-hero::before{
     content:"";position:absolute;right:-60px;top:-60px;
     width:220px;height:220px;border-radius:50%;
-    background:radial-gradient(circle,rgba(14,165,160,.45),transparent 70%);
+    background:radial-gradient(circle,rgba(34,224,200,.35),transparent 70%);
   }
   .home-hero::after{
     content:"";position:absolute;left:-40px;bottom:-80px;
     width:180px;height:180px;border-radius:50%;
-    background:radial-gradient(circle,rgba(217,122,43,.25),transparent 70%);
+    background:radial-gradient(circle,rgba(253,186,77,.18),transparent 70%);
   }
   .home-hero .eyebrow{color:rgba(255,255,255,.65);font-size:13px;margin:0 0 6px;position:relative;}
   .home-hero h1{font-size:25px;margin:0;font-weight:700;letter-spacing:-.01em;position:relative;line-height:1.3;}
@@ -130,15 +142,15 @@
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
   }
-  .choice-card.primary .choice-icon{background:linear-gradient(135deg,var(--accent-soft),#fff);color:var(--accent-dark);}
-  .choice-card.secondary .choice-icon{background:linear-gradient(135deg,#F1EEE8,#fff);color:#7A6A4E;}
+  .choice-card.primary .choice-icon{background:linear-gradient(135deg,var(--accent-soft),rgba(34,224,200,.03));color:var(--accent);}
+  .choice-card.secondary .choice-icon{background:linear-gradient(135deg,var(--warn-soft),rgba(253,186,77,.03));color:var(--warn);}
   .choice-icon svg{width:26px;height:26px;}
   .choice-body h3{margin:0 0 3px;font-size:17px;}
   .choice-body p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.4;}
   .choice-arrow{color:var(--ink-soft);font-size:18px;flex-shrink:0;}
   .lock-tag{
-    margin-left:auto;font-size:11px;color:#7A6A4E;
-    background:#F1EEE8;padding:3px 8px;border-radius:20px;
+    margin-left:auto;font-size:11px;color:var(--warn);
+    background:var(--warn-soft);padding:3px 8px;border-radius:20px;
     flex-shrink:0;white-space:nowrap;
   }
   .home-footer{padding:0 20px 20px;text-align:center;font-size:11.5px;color:var(--ink-soft);}
@@ -162,7 +174,7 @@
     padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;
     cursor:pointer;
   }
-  .result-card:active{background:#F1F5F5;}
+  .result-card:active{background:var(--surface-2);}
   .result-info .brand-tag{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
   .result-info .model-name{font-weight:600;font-size:14.5px;margin:2px 0;}
   .result-info .specs{font-size:12px;color:var(--ink-soft);}
@@ -181,13 +193,13 @@
   .spec-pill{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12.5px;color:var(--ink-soft);}
 
   .price-panel{
-    background:var(--ink);color:#fff;border-radius:20px;
+    background:linear-gradient(160deg,var(--surface-2),var(--bg));color:#fff;border-radius:20px;border:1px solid var(--line);
     padding:24px 22px;position:relative;overflow:hidden;
   }
   .price-panel::after{
     content:"";position:absolute;right:-40px;top:-40px;
     width:140px;height:140px;border-radius:50%;
-    background:radial-gradient(circle,rgba(14,165,160,.35),transparent 70%);
+    background:radial-gradient(circle,rgba(34,224,200,.28),transparent 70%);
   }
   .price-panel .label{font-size:12.5px;color:rgba(255,255,255,.6);margin-bottom:6px;position:relative;}
   .price-panel .price{font-size:38px;font-weight:700;letter-spacing:-.01em;position:relative;}
@@ -200,7 +212,7 @@
     display:flex;align-items:center;justify-content:center;gap:8px;
     cursor:pointer;
   }
-  .promo-toggle:active{background:#D2EDEB;}
+  .promo-toggle:active{background:rgba(34,224,200,.22);}
 
   .promo-panel{
     background:var(--card);border:1px solid var(--line);border-radius:18px;
@@ -217,7 +229,7 @@
   }
   .dni-row input:focus{border-color:var(--accent);}
   .btn-check{
-    background:var(--ink);color:#fff;border:none;border-radius:12px;
+    background:var(--accent);color:var(--bg);border:none;border-radius:12px;
     padding:0 18px;font-weight:600;font-size:14px;cursor:pointer;
     font-family:'Inter',sans-serif;
   }
@@ -235,18 +247,20 @@
   .offer-box .now{font-size:30px;font-weight:700;color:var(--ink);font-family:'Space Grotesk',sans-serif;}
   .offer-box .save{font-size:12.5px;color:var(--warn);font-weight:600;margin-top:2px;}
   .promo-error{
-    background:#F1F0EC;color:var(--ink-soft);border:1px solid var(--line);border-radius:12px;
+    background:var(--surface-2);color:var(--text-soft);border:1px solid var(--line);border-radius:12px;
     padding:12px 14px;font-size:13px;display:none;
     align-items:center;gap:8px;
   }
   .promo-error.active{display:flex;}
+  .promo-error.error{background:var(--danger-soft);color:var(--danger);border-color:rgba(255,107,107,.35);}
+  .promo-error.exito{background:var(--success-soft);color:var(--success);border-color:rgba(61,220,132,.35);}
 
   .pin-overlay{
     position:fixed;inset:0;background:rgba(15,27,45,.55);
     display:none;align-items:center;justify-content:center;padding:24px;z-index:50;
   }
   .pin-overlay.active{display:flex;}
-  .pin-box{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:340px;}
+  .pin-box{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;width:100%;max-width:340px;}
   .pin-box h3{margin:0 0 6px;font-size:17px;}
   .pin-box p{margin:0 0 16px;font-size:13px;color:var(--ink-soft);}
   .pin-box input{
@@ -257,7 +271,7 @@
   .pin-actions{display:flex;gap:10px;}
   .pin-actions button{flex:1;border:none;border-radius:12px;padding:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;}
   .pin-cancel{background:var(--paper);color:var(--ink-soft);}
-  .pin-confirm{background:var(--ink);color:#fff;}
+  .pin-confirm{background:var(--accent);color:var(--bg);font-weight:700;}
 
   .owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .owner-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
@@ -268,16 +282,15 @@
   .desktop-block{
     min-height:100vh;display:flex;align-items:center;justify-content:center;
     flex-direction:column;text-align:center;padding:40px 24px;
-    background:var(--ink);color:#fff;
+    background:var(--bg);color:var(--text);
   }
   .desktop-block .icon{font-size:44px;margin-bottom:16px;}
   .desktop-block h2{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 10px;}
   .desktop-block p{color:rgba(255,255,255,.7);font-size:14.5px;max-width:320px;line-height:1.5;margin:0;}
 
-  /* Login general de la app */
   .login-block{
     min-height:100vh;display:flex;align-items:center;justify-content:center;
-    padding:32px 24px;background:var(--ink);
+    padding:32px 24px;background:var(--bg);
   }
   .login-card{
     background:var(--card);border-radius:22px;padding:28px 24px;
@@ -294,17 +307,16 @@
   }
   .login-field input:focus{border-color:var(--accent);}
   .login-btn{
-    width:100%;background:var(--ink);color:#fff;border:none;border-radius:12px;
+    width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:12px;
     padding:13px;font-weight:600;font-size:14.5px;cursor:pointer;margin-top:8px;
     font-family:'Inter',sans-serif;
   }
   .login-error{
-    background:#FDECEC;color:#B3261E;border-radius:10px;padding:10px 12px;
+    background:var(--danger-soft);color:var(--danger);border-radius:10px;padding:10px 12px;
     font-size:12.5px;margin-top:10px;display:none;text-align:center;
   }
   .login-error.active{display:block;}
 
-  /* Filtro de precio (chips) */
   .price-filters{
     display:flex;gap:8px;overflow-x:auto;padding:0 20px 12px;
     scrollbar-width:none;
@@ -315,7 +327,23 @@
     border-radius:20px;padding:7px 14px;font-size:12.5px;color:var(--ink-soft);
     cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;
   }
-  .price-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .price-chip.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700;}
+
+  .vender-mini-btn{
+    background:var(--surface);border:1.5px solid var(--accent);color:var(--accent);
+    border-radius:20px;padding:6px 16px;font-weight:700;font-size:12.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .vender-mini-btn:active{background:var(--accent-soft);}
+
+  .scan-btn{
+    width:48px;height:48px;border-radius:12px;border:1px solid var(--line);
+    background:var(--card);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;flex-shrink:0;color:var(--ink);
+  }
+  .scan-btn:active{background:var(--surface-2);}
+  #reader{border-radius:14px;overflow:hidden;}
+  #reader video{border-radius:14px;}
 </style>
 </head>
 <body>
@@ -323,7 +351,7 @@
 <div class="desktop-block" id="desktop-block" style="display:none;">
   <div class="icon">📱</div>
   <h2>Abre esta página desde tu celular</h2>
-  <p>Por seguridad, el panel de precios de Precios Better solo funciona desde un teléfono móvil.</p>
+  <p>Por seguridad, el panel de precios de Better Comunication solo funciona desde un teléfono móvil.</p>
 </div>
 
 <div class="login-block" id="login-block" style="display:none;">
@@ -363,7 +391,7 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M5 12h4M15 12h4" stroke="#0F1B2D" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.4" fill="#0F1B2D"/></svg>
         </div>
         <div class="brand-text">
-          <div class="name">Precios Better</div>
+          <div class="name">Better Comunication</div>
           <div class="role">Panel de precios</div>
         </div>
       </div>
@@ -392,7 +420,7 @@
         <span class="lock-tag">🔒 Privado</span>
       </div>
     </div>
-    <div class="home-footer">Francell Store · uso interno</div>
+    <div class="home-footer">Better Comunication · uso interno</div>
   </section>
 
   <section id="screen-search" class="screen">
@@ -438,7 +466,7 @@
         </div>
       </div>
 
-      <img id="d-foto" src="" loading="lazy" style="width:100%;max-height:220px;object-fit:contain;background:#F1F0EC;border-radius:16px;padding:10px;">
+      <img id="d-foto" src="" loading="lazy" style="width:100%;max-height:220px;object-fit:contain;background:var(--surface-2);border-radius:16px;padding:10px;">
       <p id="d-swipe-hint" style="text-align:center;font-size:11.5px;color:var(--ink-soft);margin:-8px 0 0;">← Desliza para ver otro equipo →</p>
 
       <div class="owner-grid" id="d-specs-grid">
@@ -459,8 +487,12 @@
         🎁 Ver si tiene promoción disponible
       </button>
 
-      <button class="promo-toggle" style="background:#ECEAF6;color:#4C3F91;" onclick="abrirComparar()">
+      <button class="promo-toggle" style="background:rgba(167,139,250,.14);color:#C4B5FD;" onclick="abrirComparar()">
         ⚖️ Comparar con otro modelo
+      </button>
+
+      <button class="promo-toggle" style="background:var(--accent);color:var(--bg);font-weight:700;" onclick="abrirVender(productoActual)">
+        🧾 Proceder a vender
       </button>
 
       <div class="promo-panel" id="promo-panel">
@@ -505,7 +537,7 @@
       <div id="compare-table-wrap" style="display:none;">
         <table id="compare-table" style="width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;">
           <thead>
-            <tr style="background:var(--ink);color:#fff;">
+            <tr style="background:var(--surface-2);color:#fff;">
               <th style="padding:12px 10px;text-align:left;font-size:12px;width:30%;">Especificación</th>
               <th id="cmp-head-a" style="padding:12px 8px;text-align:center;font-size:12.5px;">A</th>
               <th id="cmp-head-b" style="padding:12px 8px;text-align:center;font-size:12.5px;">B</th>
@@ -546,6 +578,69 @@
     </div>
   </section>
 
+  <!-- ===================== PROCEDER A VENDER ===================== -->
+  <section id="screen-vender" class="screen">
+    <div class="topbar">
+      <div class="back" onclick="history.back()">‹</div>
+      <div class="brand-text">
+        <div class="name" style="font-size:15px;">Proceder a vender</div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-head">
+        <div class="brand-tag">EQUIPO</div>
+        <h2 id="vender-equipo">-</h2>
+        <div class="specs-row">
+          <span class="spec-pill" id="vender-specs">-</span>
+        </div>
+      </div>
+
+      <div class="promo-panel active">
+        <h4>Datos del cliente</h4>
+        <div class="dni-row">
+          <input id="venta-dni" type="tel" maxlength="8" placeholder="DNI del cliente" oninput="this.value=this.value.replace(/\D/g,'')">
+          <button class="btn-check" id="venta-btn-buscar-dni" onclick="buscarClienteVenta()">Buscar</button>
+        </div>
+        <div class="promo-error" id="venta-reniec-error"></div>
+        <div class="login-field" style="margin-top:6px;">
+          <label>Nombre del cliente</label>
+          <input id="venta-nombre" type="text" placeholder="Se autocompleta o escríbelo tú">
+        </div>
+      </div>
+
+      <div class="promo-panel active">
+        <h4>Datos de la venta</h4>
+        <div class="login-field">
+          <label>Precio acordado (S/)</label>
+          <input id="venta-precio" type="number" placeholder="0">
+        </div>
+        <div class="login-field">
+          <label>IMEI del equipo (15 dígitos)</label>
+          <div style="display:flex;gap:8px;">
+            <input id="venta-imei" type="tel" maxlength="15" placeholder="Ej: 356938035643809" oninput="this.value=this.value.replace(/\D/g,'').slice(0,15)" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
+            <button type="button" class="scan-btn" onclick="abrirEscanerImei()" title="Escanear código de barras">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M20 8V6a2 2 0 00-2-2h-2M20 16v2a2 2 0 01-2 2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+            </button>
+          </div>
+          <p class="hint" style="margin-top:6px;">Toca el ícono de cámara y apunta al código de barras de la caja.</p>
+        </div>
+        <div class="login-field">
+          <label>Teléfono del cliente</label>
+          <input id="venta-telefono" type="tel" inputmode="numeric" maxlength="9" placeholder="Ej: 912854798" oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)">
+        </div>
+      </div>
+
+      <div class="promo-panel active">
+        <h4>📧 Correo del cliente</h4>
+        <p class="hint">Ahí le llegará el resumen de su compra.</p>
+        <input id="venta-correo" type="email" placeholder="correo@ejemplo.com" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
+      </div>
+
+      <button class="btn-check" id="venta-btn-enviar" style="width:100%;padding:15px;border-radius:14px;font-size:15px;" onclick="enviarVenta()">Enviar resumen</button>
+      <div class="promo-error" id="venta-resultado"></div>
+    </div>
+  </section>
+
   <section id="screen-owner" class="screen">
     <div class="topbar">
       <div class="back" onclick="history.back()">‹</div>
@@ -583,23 +678,30 @@
     </div>
   </div>
 
+  <div class="pin-overlay" id="scanner-overlay">
+    <div class="pin-box" style="max-width:380px;">
+      <h3>Escanear IMEI</h3>
+      <p>Apunta la cámara al código de barras de la caja del equipo.</p>
+      <div id="reader" style="width:100%;min-height:200px;"></div>
+      <div class="pin-actions" style="margin-top:14px;">
+        <button class="pin-cancel" onclick="cerrarEscanerImei()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
 const CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpZRGTtBhhVS80axHmwGvIxYg5p7u5q4zunuJbfAiD0eHwmBXxdXc_DEKsxQFYc0pv/exec",
   PIN_COMPRA: "767698",
-  // Carpeta donde subes las fotos dentro de tu mismo repositorio de GitHub
-  // (vacío "" porque tus fotos quedaron en la raíz del repositorio, no en una subcarpeta)
   CARPETA_IMAGENES: "",
-  // Usuario y contraseña para entrar a TODA la app (cámbialos por los tuyos)
-  LOGIN_USUARIO: "francell",
-  LOGIN_PASSWORD: "francell2026"
+  LOGIN_USUARIO: "admin",
+  LOGIN_PASSWORD: "767698"
 };
 
-// Ícono de respaldo (SVG) cuando un modelo todavía no tiene foto subida
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#F1F0EC"/><path d="M35 20h30a5 5 0 015 5v50a5 5 0 01-5 5H35a5 5 0 01-5-5V25a5 5 0 015-5z" fill="none" stroke="#B9B4A8" stroke-width="3"/><circle cx="50" cy="70" r="3" fill="#B9B4A8"/></svg>`
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#1C202A"/><path d="M35 20h30a5 5 0 015 5v50a5 5 0 01-5 5H35a5 5 0 01-5-5V25a5 5 0 015-5z" fill="none" stroke="#4A5262" stroke-width="3"/><circle cx="50" cy="70" r="3" fill="#4A5262"/></svg>`
 );
 
 function rutaImagen(nombreArchivo){
@@ -628,7 +730,6 @@ function esCelular(){
   }
 })();
 
-/* ---------- LOGIN GENERAL (toda la app) ---------- */
 function verificarLogin(){
   let yaEntro = false;
   try{ yaEntro = localStorage.getItem('fs_login_ok') === 'si'; }catch(e){}
@@ -711,11 +812,6 @@ function goHome(){
   try{ sessionStorage.removeItem('fs_ultima_pantalla'); }catch(e){}
 }
 
-/* ---------- NAVEGACIÓN CON HISTORIAL (botón atrás físico del celular) ----------
-   Cada vez que entramos a una pantalla nueva, la registramos en el historial
-   del navegador. Así, cuando el cliente usa el botón/gesto de "atrás" del
-   celular, en vez de salirse de la página, retrocede dentro de la app,
-   pantalla por pantalla, hasta llegar a Inicio (recién ahí sí sale). */
 function irA(id){
   try { history.pushState({ screen: id }, '', '#' + id); } catch(e){}
   showScreen(id);
@@ -731,10 +827,6 @@ window.addEventListener('popstate', function(e){
   guardarUltimaPantalla();
 });
 
-/* ---------- RECORDAR LA ÚLTIMA PANTALLA (para que un refresh no te mande a Inicio) ----------
-   Guardamos SOLO en la memoria de esta pestaña (sessionStorage), no en el servidor.
-   Si el cliente cierra el navegador del todo, se olvida y arranca de Inicio de nuevo
-   la próxima vez — eso es intencional, para que un cliente nuevo siempre parta limpio. */
 function guardarUltimaPantalla(){
   try{
     const pantallaActiva = document.querySelector('.screen.active');
@@ -764,16 +856,13 @@ async function restaurarUltimaPantalla(){
       const url = CONFIG.APPS_SCRIPT_URL + '?action=detalle&id=' + encodeURIComponent(guardado.productoId);
       const data = await jsonpRequest(url);
       if (data.producto){
-        // Reconstruimos el "camino" (Inicio → Buscar → Detalle) para que el
-        // botón atrás siga funcionando normal después de restaurar.
         goSearch(modo);
         await buscarModelos('');
         abrirDetalle(data.producto);
       }
-    } catch(e){ /* si falla, simplemente se queda en Inicio, sin romper nada */ }
+    } catch(e){ }
     return;
   }
-  // "screen-compare" no se restaura (necesitaría 2 productos): se queda en Inicio.
 }
 
 function goSearch(m){
@@ -869,7 +958,7 @@ function renderResultados(resultados){
     const precioMostrar = modo === 'venta' ? p.precioVenta : p.precioVenta;
     card.innerHTML = `
       <img src="${rutaImagen(p.imagen)}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'"
-           style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#F1F0EC;">
+           style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--surface-2);">
       <div class="result-info">
         <div class="brand-tag">${p.marca}</div>
         <div class="model-name">${p.modelo}</div>
@@ -884,7 +973,6 @@ function renderResultados(resultados){
   });
 }
 
-/* ---------- FILTRO DE PRECIO ---------- */
 function resetFiltroPrecio(){
   filtroPrecioActivo = 'todos';
   document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('active'));
@@ -909,7 +997,6 @@ let listaActualDetalle = [];
 let indiceActualDetalle = -1;
 
 function abrirDetalle(p){
-  // Guardamos en qué lista y posición está, para poder deslizar al vecino
   listaActualDetalle = aplicarFiltroPrecio(ultimosResultados);
   indiceActualDetalle = listaActualDetalle.findIndex(x => x.id === p.id);
 
@@ -960,11 +1047,10 @@ function renderDetalleCompra(p){
   document.getElementById('o-compra').textContent = 'Cargando...';
 }
 
-/* ---------- DESLIZAR (swipe) para pasar al equipo siguiente/anterior ---------- */
 function irAVecino(direccion){
   if (!listaActualDetalle.length || indiceActualDetalle === -1) return;
   const nuevoIndice = indiceActualDetalle + direccion;
-  if (nuevoIndice < 0 || nuevoIndice >= listaActualDetalle.length) return; // ya es el primero/último
+  if (nuevoIndice < 0 || nuevoIndice >= listaActualDetalle.length) return;
 
   indiceActualDetalle = nuevoIndice;
   const p = listaActualDetalle[indiceActualDetalle];
@@ -991,10 +1077,8 @@ function activarSwipe(idContenedor){
   el.addEventListener('touchend', function(e){
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
-    // Solo cuenta como "deslizar" si el movimiento horizontal es claro
-    // y mayor que el vertical (para no chocar con el scroll normal)
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5){
-      irAVecino(dx < 0 ? 1 : -1); // izquierda = siguiente, derecha = anterior
+      irAVecino(dx < 0 ? 1 : -1);
     }
   }, { passive: true });
 }
@@ -1021,7 +1105,6 @@ function togglePromo(){
   document.getElementById('promo-btn').style.display = panel.classList.contains('active') ? 'none' : 'flex';
 }
 
-/* ---------- COMPARAR ---------- */
 let cmpA = null;
 let cmpB = null;
 let cmpSearchTimer = null;
@@ -1115,13 +1198,13 @@ function renderTablaComparativa(){
   filas.forEach((f, i) => {
     const tr = document.createElement('tr');
     tr.style.borderTop = '1px solid var(--line)';
-    if (i % 2 === 1) tr.style.background = '#FAFAFA';
+    if (i % 2 === 1) tr.style.background = 'rgba(255,255,255,.025)';
 
     if (f[0] === '__foto__'){
       tr.innerHTML = `
         <td style="padding:10px;color:var(--ink-soft);">Foto</td>
-        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[1])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:#F1F0EC;border-radius:8px;"></td>
-        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[2])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:#F1F0EC;border-radius:8px;"></td>`;
+        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[1])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:var(--surface-2);border-radius:8px;"></td>
+        <td style="padding:8px;text-align:center;"><img src="${rutaImagen(f[2])}" loading="lazy" onerror="this.src='${IMG_PLACEHOLDER}'" style="width:56px;height:56px;object-fit:contain;background:var(--surface-2);border-radius:8px;"></td>`;
       tbody.appendChild(tr);
       return;
     }
@@ -1133,6 +1216,14 @@ function renderTablaComparativa(){
       <td style="padding:10px;text-align:center;${destacar}">${f[2]}</td>`;
     tbody.appendChild(tr);
   });
+
+  const trVender = document.createElement('tr');
+  trVender.style.borderTop = '1px solid var(--line)';
+  trVender.innerHTML = `
+    <td style="padding:10px;color:var(--ink-soft);"></td>
+    <td style="padding:10px 6px;text-align:center;"><button class="vender-mini-btn" onclick="venderDesdeComparar('A')">Vender</button></td>
+    <td style="padding:10px 6px;text-align:center;"><button class="vender-mini-btn" onclick="venderDesdeComparar('B')">Vender</button></td>`;
+  tbody.appendChild(trVender);
 }
 
 async function consultarPromoComparar(){
@@ -1216,6 +1307,181 @@ async function consultarPromo(){
   } finally {
     btn.disabled = false;
     btn.textContent = 'Buscar';
+  }
+}
+
+let ventaProducto = null;
+
+function abrirVender(p, precioSugerido){
+  if (!p) return;
+  ventaProducto = p;
+  document.getElementById('vender-equipo').textContent = p.marca + ' ' + p.modelo;
+  document.getElementById('vender-specs').textContent = p.capacidad + ' · ' + p.ram;
+  document.getElementById('venta-precio').value = (precioSugerido != null) ? precioSugerido : p.precioVenta;
+  document.getElementById('venta-dni').value = '';
+  document.getElementById('venta-nombre').value = '';
+  document.getElementById('venta-imei').value = '';
+  document.getElementById('venta-telefono').value = '';
+  document.getElementById('venta-correo').value = '';
+  document.getElementById('venta-reniec-error').classList.remove('active');
+  const resBox = document.getElementById('venta-resultado');
+  resBox.classList.remove('active', 'error', 'exito');
+  resBox.textContent = '';
+
+  irA('screen-vender');
+}
+
+function venderDesdeComparar(cual){
+  const p = (cual === 'A') ? cmpA : cmpB;
+  abrirVender(p);
+}
+
+async function buscarClienteVenta(){
+  const dni = document.getElementById('venta-dni').value;
+  const errBox = document.getElementById('venta-reniec-error');
+  errBox.classList.remove('active', 'error', 'exito');
+
+  if (dni.length !== 8){
+    errBox.textContent = 'Ingresa un DNI válido de 8 dígitos.';
+    errBox.classList.add('active');
+    return;
+  }
+
+  const btn = document.getElementById('venta-btn-buscar-dni');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=reniec&dni=' + dni;
+    const data = await jsonpRequest(url);
+
+    if (data.error){
+      errBox.textContent = data.error + ' Puedes escribir el nombre manualmente.';
+      errBox.classList.add('active');
+    } else {
+      document.getElementById('venta-nombre').value = data.nombreCompleto;
+    }
+  } catch(e){
+    errBox.textContent = 'No se pudo conectar con RENIEC. Escribe el nombre manualmente.';
+    errBox.classList.add('active');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buscar';
+  }
+}
+
+async function enviarVenta(){
+  const dni = document.getElementById('venta-dni').value;
+  const nombreCliente = document.getElementById('venta-nombre').value.trim();
+  const precio = document.getElementById('venta-precio').value;
+  const imei = document.getElementById('venta-imei').value;
+  const telefono = document.getElementById('venta-telefono').value.trim();
+  const correoCliente = document.getElementById('venta-correo').value.trim();
+  const resBox = document.getElementById('venta-resultado');
+  resBox.classList.remove('active', 'error', 'exito');
+
+  if (!ventaProducto){
+    resBox.textContent = 'No se encontró el equipo. Vuelve a intentarlo desde el detalle.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (imei.length !== 15){
+    resBox.textContent = 'El IMEI debe tener 15 dígitos.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (!precio){
+    resBox.textContent = 'Ingresa el precio acordado.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (!correoCliente){
+    resBox.textContent = 'Ingresa el correo del cliente.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('venta-btn-enviar');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  try{
+    const params = [
+      'action=enviarVenta',
+      'marca=' + encodeURIComponent(ventaProducto.marca),
+      'modelo=' + encodeURIComponent(ventaProducto.modelo),
+      'capacidad=' + encodeURIComponent(ventaProducto.capacidad),
+      'ram=' + encodeURIComponent(ventaProducto.ram),
+      'precio=' + encodeURIComponent(precio),
+      'imei=' + encodeURIComponent(imei),
+      'dni=' + encodeURIComponent(dni),
+      'telefono=' + encodeURIComponent(telefono),
+      'nombreCliente=' + encodeURIComponent(nombreCliente),
+      'correoCliente=' + encodeURIComponent(correoCliente)
+    ].join('&');
+
+    const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
+    const data = await jsonpRequest(url, 15000);
+
+    if (data.error){
+      resBox.textContent = data.error;
+      resBox.classList.add('active', 'error');
+    } else {
+      resBox.textContent = '✅ Resumen enviado correctamente al correo del cliente.';
+      resBox.classList.add('active', 'exito');
+    }
+  } catch(e){
+    resBox.textContent = 'No se pudo conectar. Intenta de nuevo.';
+    resBox.classList.add('active', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar resumen';
+  }
+}
+
+let escanerImei = null;
+
+function abrirEscanerImei(){
+  document.getElementById('scanner-overlay').classList.add('active');
+  document.getElementById('reader').innerHTML = '';
+
+  escanerImei = new Html5Qrcode('reader');
+  const config = {
+    fps: 10,
+    qrbox: { width: 260, height: 120 },
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.QR_CODE
+    ]
+  };
+
+  escanerImei.start(
+    { facingMode: 'environment' },
+    config,
+    function(textoDetectado){
+      const soloDigitos = textoDetectado.replace(/\D/g, '');
+      if (soloDigitos.length >= 14){
+        document.getElementById('venta-imei').value = soloDigitos.slice(0, 15);
+        cerrarEscanerImei();
+      }
+    },
+    function(){ }
+  ).catch(function(err){
+    alert('No se pudo acceder a la cámara: ' + err);
+    cerrarEscanerImei();
+  });
+}
+
+function cerrarEscanerImei(){
+  document.getElementById('scanner-overlay').classList.remove('active');
+  if (escanerImei){
+    escanerImei.stop().then(function(){
+      escanerImei.clear();
+      escanerImei = null;
+    }).catch(function(){ escanerImei = null; });
   }
 }
 </script>
