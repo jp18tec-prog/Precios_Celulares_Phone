@@ -469,14 +469,10 @@
         <input id="search-input" type="text" placeholder="Ej: Redmi, iPhone 17, S25 Ultra..." oninput="onSearchInput()">
       </div>
     </div>
-    <div class="price-filters" id="price-filters">
-      <div class="price-chip active" data-rango="todos" onclick="seleccionarFiltroPrecio('todos', this)">Todos</div>
-      <div class="price-chip" data-rango="0-500" onclick="seleccionarFiltroPrecio('0-500', this)">Hasta S/500</div>
-      <div class="price-chip" data-rango="500-1000" onclick="seleccionarFiltroPrecio('500-1000', this)">S/500-1000</div>
-      <div class="price-chip" data-rango="1000-2000" onclick="seleccionarFiltroPrecio('1000-2000', this)">S/1000-2000</div>
-      <div class="price-chip" data-rango="2000-3000" onclick="seleccionarFiltroPrecio('2000-3000', this)">S/2000-3000</div>
-      <div class="price-chip" data-rango="3000-99999" onclick="seleccionarFiltroPrecio('3000-99999', this)">+S/3000</div>
+    <div id="manual-box" style="display:none;padding:0 20px 12px;">
+      <button type="button" class="promo-toggle" style="width:100%;background:var(--surface-2);border:1px dashed var(--accent);color:var(--accent);" onclick="abrirVenderManual()">➕ Vender equipo no listado (teclas u otros)</button>
     </div>
+    <div class="price-filters" id="price-filters"></div>
     <div id="results-count" class="results-count"></div>
     <div id="results-list" class="results-list"></div>
   </section>
@@ -627,6 +623,28 @@
         </div>
       </div>
 
+      <div class="promo-panel" id="venta-manual-panel">
+        <h4>Datos del equipo (venta manual)</h4>
+        <div class="login-field">
+          <label>Marca</label>
+          <input id="venta-man-marca" type="text" list="lista-marcas" placeholder="Ej: Nokia, Itel, Samsung..." autocomplete="off">
+          <datalist id="lista-marcas"></datalist>
+        </div>
+        <div class="login-field">
+          <label>Modelo</label>
+          <input id="venta-man-modelo" type="text" placeholder="Ej: 105">
+        </div>
+        <div class="login-field">
+          <label>Capacidad (opcional)</label>
+          <input id="venta-man-capacidad" type="text" placeholder="Ej: 128GB">
+        </div>
+        <div class="login-field">
+          <label>RAM (opcional)</label>
+          <input id="venta-man-ram" type="text" placeholder="Ej: 4GB">
+        </div>
+        <p class="hint">Para equipos que no están en el catálogo. No se registra ganancia de estos equipos.</p>
+      </div>
+
       <div class="promo-panel active">
         <h4>Datos del cliente</h4>
         <div class="dni-row">
@@ -730,12 +748,12 @@
 <script>
 const CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzpZRGTtBhhVS80axHmwGvIxYg5p7u5q4zunuJbfAiD0eHwmBXxdXc_DEKsxQFYc0pv/exec",
-  PIN_COMPRA: "71011",
+  PIN_COMPRA: "767698",
   CARPETA_IMAGENES: "",
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
   // Lista de vendedores (aparece en el selector del formulario de venta)
-  VENDEDORES: ["Jhon", "Jhelsyn", "Maricela", "Moises"]
+  VENDEDORES: ["Jhon Percca", "Jhelsyn Cardenas", "Maricela Tafur", "Moises Sebastian"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -924,6 +942,7 @@ function goSearch(m){
 
   // Informe de ventas: solo visible en Precio Compra
   document.getElementById('informe-box').classList.toggle('active', m === 'compra');
+  document.getElementById('manual-box').style.display = (m === 'venta') ? 'block' : 'none';
   if (m === 'compra'){
     const hoy = new Date();
     document.getElementById('informe-desde').value = isoLocal(hoy);
@@ -969,7 +988,6 @@ function onSearchInput(){
 }
 
 let ultimosResultados = [];
-let filtroPrecioActivo = 'todos';
 
 async function buscarModelos(q){
   const list = document.getElementById('results-list');
@@ -992,6 +1010,8 @@ async function buscarModelos(q){
     ultimosResultados.sort((a, b) =>
       (a.marca + ' ' + a.modelo).localeCompare(b.marca + ' ' + b.modelo, 'es', { sensitivity: 'base' })
     );
+    ultimosResultados.forEach(p => { if (p.marca) marcasConocidas.add(String(p.marca).trim()); });
+    renderChipsMarcas(ultimosResultados);
     renderResultados(aplicarFiltroPrecio(ultimosResultados));
 
   } catch(err){
@@ -1031,24 +1051,47 @@ function renderResultados(resultados){
   });
 }
 
-function resetFiltroPrecio(){
-  filtroPrecioActivo = 'todos';
-  document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('active'));
-  const primero = document.querySelector('.price-chip[data-rango="todos"]');
-  if (primero) primero.classList.add('active');
+let filtroMarcaActiva = 'todas';
+const marcasConocidas = new Set();
+
+function resetFiltroPrecio(){   // se llama al abrir la búsqueda (nombre conservado)
+  filtroMarcaActiva = 'todas';
+  document.getElementById('price-filters').innerHTML = '';
 }
 
-function seleccionarFiltroPrecio(rango, elemento){
-  filtroPrecioActivo = rango;
-  document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('active'));
-  elemento.classList.add('active');
+function renderChipsMarcas(lista){
+  const cont = document.getElementById('price-filters');
+  const scrollPrevio = cont.scrollLeft;
+  const conteo = {};
+  lista.forEach(p => {
+    const m = (p.marca || '').toString().trim();
+    if (m) conteo[m] = (conteo[m] || 0) + 1;
+  });
+  const marcas = Object.keys(conteo).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  if (filtroMarcaActiva !== 'todas' && !conteo[filtroMarcaActiva]) filtroMarcaActiva = 'todas';
+
+  cont.innerHTML = '';
+  const crear = function(valor, texto){
+    const chip = document.createElement('div');
+    chip.className = 'price-chip' + (valor === filtroMarcaActiva ? ' active' : '');
+    chip.textContent = texto;
+    chip.addEventListener('click', function(){ seleccionarMarca(valor); });
+    cont.appendChild(chip);
+  };
+  crear('todas', 'Todas (' + lista.length + ')');
+  marcas.forEach(m => crear(m, m + ' (' + conteo[m] + ')'));
+  cont.scrollLeft = scrollPrevio;
+}
+
+function seleccionarMarca(marca){
+  filtroMarcaActiva = marca;
+  renderChipsMarcas(ultimosResultados);
   renderResultados(aplicarFiltroPrecio(ultimosResultados));
 }
 
-function aplicarFiltroPrecio(lista){
-  if (filtroPrecioActivo === 'todos') return lista;
-  const [min, max] = filtroPrecioActivo.split('-').map(Number);
-  return lista.filter(p => p.precioVenta > min && p.precioVenta <= max);
+function aplicarFiltroPrecio(lista){   // ahora filtra por marca (nombre conservado)
+  if (filtroMarcaActiva === 'todas') return lista;
+  return lista.filter(p => (p.marca || '').toString().trim() === filtroMarcaActiva);
 }
 
 let listaActualDetalle = [];
@@ -1421,9 +1464,21 @@ function cargarVendedores(){
 function abrirVender(p, precioSugerido){
   if (!p) return;
   ventaProducto = p;
-  document.getElementById('vender-equipo').textContent = p.marca + ' ' + p.modelo;
-  document.getElementById('vender-specs').textContent = p.capacidad + ' · ' + p.ram;
-  document.getElementById('venta-precio').value = (precioSugerido != null) ? precioSugerido : p.precioVenta;
+  const esManual = !!p.manual;
+  document.getElementById('venta-manual-panel').classList.toggle('active', esManual);
+  document.getElementById('vender-equipo').textContent = esManual ? 'Equipo no listado' : p.marca + ' ' + p.modelo;
+  document.getElementById('vender-specs').textContent = esManual ? 'Venta manual' : p.capacidad + ' · ' + p.ram;
+  document.getElementById('venta-precio').value = esManual ? '' : ((precioSugerido != null) ? precioSugerido : p.precioVenta);
+  if (esManual){
+    ['venta-man-marca', 'venta-man-modelo', 'venta-man-capacidad', 'venta-man-ram'].forEach(id => { document.getElementById(id).value = ''; });
+    const dl = document.getElementById('lista-marcas');
+    dl.innerHTML = '';
+    Array.from(marcasConocidas).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' })).forEach(m => {
+      const o = document.createElement('option');
+      o.value = m;
+      dl.appendChild(o);
+    });
+  }
   let precargado = false;
   if (clienteActual && (Date.now() - clienteActual.t) < MINUTOS_CLIENTE * 60000){
     document.getElementById('venta-dni').value = clienteActual.dni;
@@ -1449,6 +1504,10 @@ function abrirVender(p, precioSugerido){
 
   cargarVendedores();
   irA('screen-vender');
+}
+
+function abrirVenderManual(){
+  abrirVender({ manual: true, id: '', marca: '', modelo: '', capacidad: '', ram: '' });
 }
 
 function venderDesdeComparar(cual){
@@ -1518,6 +1577,25 @@ async function enviarVenta(){
     resBox.classList.add('active', 'error');
     return;
   }
+  const norm = function(t){ return (t || '').replace(/\s+/g, ' ').trim(); };
+  let equipo;
+  if (ventaProducto.manual){
+    equipo = {
+      id: '',
+      marca: norm(document.getElementById('venta-man-marca').value),
+      modelo: norm(document.getElementById('venta-man-modelo').value),
+      capacidad: norm(document.getElementById('venta-man-capacidad').value),
+      ram: norm(document.getElementById('venta-man-ram').value)
+    };
+    if (!equipo.marca || !equipo.modelo){
+      resBox.textContent = 'Escribe la marca y el modelo del equipo.';
+      resBox.classList.add('active', 'error');
+      return;
+    }
+  } else {
+    equipo = { id: ventaProducto.id, marca: ventaProducto.marca, modelo: ventaProducto.modelo,
+               capacidad: ventaProducto.capacidad, ram: ventaProducto.ram };
+  }
   if (imei.length !== 15){
     resBox.textContent = 'El IMEI debe tener 15 dígitos.';
     resBox.classList.add('active', 'error');
@@ -1541,10 +1619,11 @@ async function enviarVenta(){
   try{
     const params = [
       'action=enviarVenta',
-      'marca=' + encodeURIComponent(ventaProducto.marca),
-      'modelo=' + encodeURIComponent(ventaProducto.modelo),
-      'capacidad=' + encodeURIComponent(ventaProducto.capacidad),
-      'ram=' + encodeURIComponent(ventaProducto.ram),
+      'marca=' + encodeURIComponent(equipo.marca),
+      'modelo=' + encodeURIComponent(equipo.modelo),
+      'capacidad=' + encodeURIComponent(equipo.capacidad),
+      'ram=' + encodeURIComponent(equipo.ram),
+      'idProducto=' + encodeURIComponent(equipo.id || ''),
       'precio=' + encodeURIComponent(precio),
       'imei=' + encodeURIComponent(imei),
       'dni=' + encodeURIComponent(dni),
@@ -1694,68 +1773,74 @@ async function generarInforme(){
     const doc = new jsPDF({ orientation: 'landscape' });
     const ventas = data.ventas;
     const total = ventas.reduce((s, v) => s + v.precio, 0);
+    const sumaGan = function(arr){ return arr.reduce((s, v) => s + (v.ganancia != null ? v.ganancia : 0), 0); };
+    const totalGan = sumaGan(ventas);
     const rangoTxt = (data.desde === data.hasta) ? data.desde : (data.desde + ' al ' + data.hasta);
 
     doc.setFontSize(16);
     doc.text('Better Comunication - Informe de ventas', 14, 16);
     doc.setFontSize(11);
-    doc.text('Periodo: ' + rangoTxt + '    |    Equipos vendidos: ' + ventas.length + '    |    Total: S/ ' + total.toFixed(2), 14, 24);
+    doc.text('Periodo: ' + rangoTxt + '    |    Equipos vendidos: ' + ventas.length + '    |    Total: S/ ' + total.toFixed(2) + '    |    Ganancia: S/ ' + totalGan.toFixed(2), 14, 24);
+    doc.setFontSize(8);
+    doc.text('La ganancia se calcula solo con equipos del catálogo (los equipos manuales no llevan costo). [M] = venta manual.', 14, 29);
 
     doc.autoTable({
-      startY: 30,
-      head: [['Fecha', 'Hora', 'Vendedor', 'Cliente', 'Equipo', 'IMEI', 'Precio (S/)']],
+      startY: 33,
+      head: [['Fecha', 'Hora', 'Vendedor', 'Cliente', 'Equipo', 'IMEI', 'Precio (S/)', 'Ganancia (S/)']],
       body: ventas.map(v => [
         v.fecha, v.hora, v.vendedor, v.cliente || '-',
-        v.marca + ' ' + v.modelo + ' ' + v.capacidad + ' ' + v.ram,
-        v.imei, v.precio.toFixed(2)
+        [v.marca, v.modelo, v.capacidad, v.ram].filter(x => x && String(x).trim()).join(' ') + (v.origen === 'Manual' ? ' [M]' : ''),
+        v.imei, v.precio.toFixed(2), v.ganancia != null ? v.ganancia.toFixed(2) : '-'
       ]),
-      styles: { fontSize: 9 },
+      styles: { fontSize: 8.5 },
       headStyles: { fillColor: [15, 168, 147] },
-      columnStyles: { 6: { halign: 'right' } }
+      columnStyles: { 6: { halign: 'right' }, 7: { halign: 'right' } }
     });
 
     // Resumen por vendedor
     const porVend = {};
     ventas.forEach(v => {
-      porVend[v.vendedor] = porVend[v.vendedor] || { n: 0, t: 0 };
+      porVend[v.vendedor] = porVend[v.vendedor] || { n: 0, t: 0, g: 0 };
       porVend[v.vendedor].n++;
       porVend[v.vendedor].t += v.precio;
+      porVend[v.vendedor].g += (v.ganancia != null ? v.ganancia : 0);
     });
 
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 10,
-      head: [['Vendedor', 'Equipos', 'Total (S/)']],
-      body: Object.keys(porVend).map(k => [k, porVend[k].n, porVend[k].t.toFixed(2)]),
-      foot: [['TOTAL DEL PERIODO', ventas.length, total.toFixed(2)]],
+      head: [['Vendedor', 'Equipos', 'Total (S/)', 'Ganancia (S/)']],
+      body: Object.keys(porVend).map(k => [k, porVend[k].n, porVend[k].t.toFixed(2), porVend[k].g.toFixed(2)]),
+      foot: [['TOTAL DEL PERIODO', ventas.length, total.toFixed(2), totalGan.toFixed(2)]],
       styles: { fontSize: 10 },
       headStyles: { fillColor: [38, 43, 54] },
       footStyles: { fillColor: [230, 230, 230], textColor: 20 },
-      tableWidth: 120
+      tableWidth: 150
     });
 
     // Resumen por día (solo si el rango abarca varios días)
     const porDia = {};
     ventas.forEach(v => {
-      porDia[v.fecha] = porDia[v.fecha] || { n: 0, t: 0 };
+      porDia[v.fecha] = porDia[v.fecha] || { n: 0, t: 0, g: 0 };
       porDia[v.fecha].n++;
       porDia[v.fecha].t += v.precio;
+      porDia[v.fecha].g += (v.ganancia != null ? v.ganancia : 0);
     });
     const dias = Object.keys(porDia);
     if (dias.length > 1){
       doc.autoTable({
         startY: doc.lastAutoTable.finalY + 10,
-        head: [['Día', 'Equipos', 'Total (S/)']],
-        body: dias.map(k => [k, porDia[k].n, porDia[k].t.toFixed(2)]),
+        head: [['Día', 'Equipos', 'Total (S/)', 'Ganancia (S/)']],
+        body: dias.map(k => [k, porDia[k].n, porDia[k].t.toFixed(2), porDia[k].g.toFixed(2)]),
         styles: { fontSize: 10 },
         headStyles: { fillColor: [38, 43, 54] },
-        tableWidth: 120
+        tableWidth: 150
       });
     }
 
     const nombreArchivo = 'Informe_ventas_' + data.desde.replace(/\//g, '-') +
       (data.desde === data.hasta ? '' : '_al_' + data.hasta.replace(/\//g, '-')) + '.pdf';
     doc.save(nombreArchivo);
-    msg.textContent = '✅ Informe descargado (' + ventas.length + ' ventas, S/ ' + total.toFixed(2) + ').';
+    msg.textContent = '✅ Informe descargado (' + ventas.length + ' ventas, S/ ' + total.toFixed(2) + ', ganancia S/ ' + totalGan.toFixed(2) + ').';
     msg.classList.add('active', 'exito');
   } catch(e){
     msg.textContent = 'No se pudo generar el informe. Intenta de nuevo.';
