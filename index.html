@@ -667,8 +667,8 @@
       </div>
 
       <div class="promo-panel active">
-        <h4>📧 Correo del cliente</h4>
-        <p class="hint">Ahí le llegará el resumen de su compra.</p>
+        <h4>📧 Correo del cliente (opcional)</h4>
+        <p class="hint">Ahí le llegará el resumen y la garantía. Si lo dejas vacío, la venta se registra igual pero no se envía correo.</p>
         <input id="venta-correo" type="email" placeholder="correo@ejemplo.com" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
       </div>
 
@@ -734,7 +734,7 @@ const CONFIG = {
   CARPETA_IMAGENES: "",
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
-  // >>> CAMBIA ESTOS NOMBRES POR LOS DE TUS VENDEDORES <<<
+  // Lista de vendedores (aparece en el selector del formulario de venta)
   VENDEDORES: ["Jhon", "Jhelsyn", "Maricela", "Moises"]
 };
 
@@ -1528,8 +1528,8 @@ async function enviarVenta(){
     resBox.classList.add('active', 'error');
     return;
   }
-  if (!correoCliente){
-    resBox.textContent = 'Ingresa el correo del cliente.';
+  if (correoCliente && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoCliente)){
+    resBox.textContent = 'El correo ingresado no es válido. Corrígelo o déjalo vacío.';
     resBox.classList.add('active', 'error');
     return;
   }
@@ -1567,7 +1567,9 @@ async function enviarVenta(){
         resBox.textContent = '⚠️ ' + data.aviso;
         resBox.classList.add('active', 'error');
       } else {
-        resBox.textContent = '✅ Venta registrada y resumen enviado al correo del cliente.';
+        resBox.textContent = data.sinCorreo
+          ? '✅ Venta registrada. No se envió correo porque no ingresaste el del cliente.'
+          : '✅ Venta registrada y resumen enviado al correo del cliente.';
         resBox.classList.add('active', 'exito');
       }
     }
