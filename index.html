@@ -630,7 +630,7 @@
       <div class="promo-panel active">
         <h4>Datos del cliente</h4>
         <div class="dni-row">
-          <input id="venta-dni" type="tel" maxlength="8" placeholder="DNI del cliente" oninput="this.value=this.value.replace(/\D/g,'')">
+          <input id="venta-dni" type="tel" maxlength="8" placeholder="DNI del cliente" oninput="this.value=this.value.replace(/\D/g,''); dniVentaCambio()">
           <button class="btn-check" id="venta-btn-buscar-dni" onclick="buscarClienteVenta()">Buscar</button>
         </div>
         <div class="promo-error" id="venta-reniec-error"></div>
@@ -735,7 +735,7 @@ const CONFIG = {
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
   // >>> CAMBIA ESTOS NOMBRES POR LOS DE TUS VENDEDORES <<<
-  VENDEDORES: ["Jhelsyn", "Moises", "Maricela", "Jhon"]
+  VENDEDORES: ["Jhon", "Jhelsyn", "Maricela", "Moises"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -751,6 +751,16 @@ let modo = "venta";
 let productoActual = null;
 let searchTimer = null;
 let searchReqId = 0;
+
+// Memoria de clientes consultados (solo en la memoria del navegador, se borra al recargar)
+const cacheDni = {};          // dni -> nombre completo
+let clienteActual = null;     // { dni, nombre, t } último cliente consultado
+const MINUTOS_CLIENTE = 30;   // pasado este tiempo ya no se precarga en la venta
+function recordarCliente(dni, nombre){
+  if (!dni || !nombre) return;
+  cacheDni[dni] = nombre;
+  clienteActual = { dni: dni, nombre: nombre, t: Date.now() };
+}
 
 function esCelular(){
   const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -1287,6 +1297,19 @@ async function consultarPromoComparar(){
     return;
   }
 
+  if (cacheDni[dni] && cmpA && cmpB){
+    document.getElementById('cmp-pr-nombre').textContent = cacheDni[dni];
+    document.getElementById('cmp-a-antes').textContent = cmpA.precioVenta;
+    document.getElementById('cmp-a-ahora').textContent = cmpA.precioPromocion;
+    document.getElementById('cmp-a-ahorro').textContent = cmpA.descuentoDisponible;
+    document.getElementById('cmp-b-antes').textContent = cmpB.precioVenta;
+    document.getElementById('cmp-b-ahora').textContent = cmpB.precioPromocion;
+    document.getElementById('cmp-b-ahorro').textContent = cmpB.descuentoDisponible;
+    recordarCliente(dni, cacheDni[dni]);
+    resBox.classList.add('active');
+    return; // sin gastar consultas
+  }
+
   const btn = document.getElementById('cmp-btn-consultar');
   btn.disabled = true;
   btn.textContent = '...';
@@ -1301,6 +1324,7 @@ async function consultarPromoComparar(){
       errBox.classList.add('active');
     } else {
       document.getElementById('cmp-pr-nombre').textContent = dataA.cliente;
+      recordarCliente(dni, dataA.cliente);
       document.getElementById('cmp-a-antes').textContent = dataA.producto.precioVenta;
       document.getElementById('cmp-a-ahora').textContent = dataA.producto.precioPromocion;
       document.getElementById('cmp-a-ahorro').textContent = dataA.producto.descuento;
@@ -1331,6 +1355,16 @@ async function consultarPromo(){
     return;
   }
 
+  if (cacheDni[dni] && productoActual){
+    document.getElementById('pr-nombre').textContent = cacheDni[dni];
+    document.getElementById('pr-antes').textContent = productoActual.precioVenta;
+    document.getElementById('pr-ahora').textContent = productoActual.precioPromocion;
+    document.getElementById('pr-ahorro').textContent = productoActual.descuentoDisponible;
+    recordarCliente(dni, cacheDni[dni]);
+    resBox.classList.add('active');
+    return; // sin gastar consulta
+  }
+
   const btn = document.getElementById('btn-consultar');
   btn.disabled = true;
   btn.textContent = '...';
@@ -1344,6 +1378,7 @@ async function consultarPromo(){
       errBox.classList.add('active');
     } else {
       document.getElementById('pr-nombre').textContent = data.cliente;
+      recordarCliente(dni, data.cliente);
       document.getElementById('pr-antes').textContent = data.producto.precioVenta;
       document.getElementById('pr-ahora').textContent = data.producto.precioPromocion;
       document.getElementById('pr-ahorro').textContent = data.producto.descuento;
@@ -1359,6 +1394,16 @@ async function consultarPromo(){
 }
 
 let ventaProducto = null;
+
+function dniVentaCambio(){
+  const dni = document.getElementById('venta-dni').value;
+  const nombre = document.getElementById('venta-nombre');
+  // Si el DNI ya no coincide con el cliente precargado, se limpia el nombre para no mezclar clientes
+  if (clienteActual && dni !== clienteActual.dni && nombre.value === clienteActual.nombre){
+    nombre.value = '';
+    document.getElementById('venta-reniec-error').classList.remove('active', 'error', 'exito');
+  }
+}
 
 function cargarVendedores(){
   const sel = document.getElementById('venta-vendedor');
@@ -1379,12 +1424,25 @@ function abrirVender(p, precioSugerido){
   document.getElementById('vender-equipo').textContent = p.marca + ' ' + p.modelo;
   document.getElementById('vender-specs').textContent = p.capacidad + ' · ' + p.ram;
   document.getElementById('venta-precio').value = (precioSugerido != null) ? precioSugerido : p.precioVenta;
-  document.getElementById('venta-dni').value = '';
-  document.getElementById('venta-nombre').value = '';
+  let precargado = false;
+  if (clienteActual && (Date.now() - clienteActual.t) < MINUTOS_CLIENTE * 60000){
+    document.getElementById('venta-dni').value = clienteActual.dni;
+    document.getElementById('venta-nombre').value = clienteActual.nombre;
+    precargado = true;
+  } else {
+    clienteActual = null;
+    document.getElementById('venta-dni').value = '';
+    document.getElementById('venta-nombre').value = '';
+  }
   document.getElementById('venta-imei').value = '';
   document.getElementById('venta-telefono').value = '';
   document.getElementById('venta-correo').value = '';
-  document.getElementById('venta-reniec-error').classList.remove('active');
+  const avisoCliente = document.getElementById('venta-reniec-error');
+  avisoCliente.classList.remove('active', 'error', 'exito');
+  if (precargado){
+    avisoCliente.textContent = 'Cliente tomado de la consulta anterior. Si es otro, cambia el DNI y toca Buscar.';
+    avisoCliente.classList.add('active', 'exito');
+  }
   const resBox = document.getElementById('venta-resultado');
   resBox.classList.remove('active', 'error', 'exito');
   resBox.textContent = '';
@@ -1409,6 +1467,12 @@ async function buscarClienteVenta(){
     return;
   }
 
+  if (cacheDni[dni]){
+    document.getElementById('venta-nombre').value = cacheDni[dni];
+    recordarCliente(dni, cacheDni[dni]);
+    return; // sin gastar consulta
+  }
+
   const btn = document.getElementById('venta-btn-buscar-dni');
   btn.disabled = true;
   btn.textContent = '...';
@@ -1422,6 +1486,7 @@ async function buscarClienteVenta(){
       errBox.classList.add('active');
     } else {
       document.getElementById('venta-nombre').value = data.nombreCompleto;
+      recordarCliente(dni, data.nombreCompleto);
     }
   } catch(e){
     errBox.textContent = 'No se pudo conectar con RENIEC. Escribe el nombre manualmente.';
@@ -1497,6 +1562,7 @@ async function enviarVenta(){
       resBox.classList.add('active', 'error');
     } else {
       try{ localStorage.setItem('fs_ultimo_vendedor', vendedor); }catch(e){}
+      clienteActual = null;
       if (data.aviso){
         resBox.textContent = '⚠️ ' + data.aviso;
         resBox.classList.add('active', 'error');
