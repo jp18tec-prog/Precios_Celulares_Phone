@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root{
     --bg:#0A0C10;
@@ -28,7 +30,6 @@
     --success-soft:rgba(61,220,132,.12);
     --radius:16px;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
-    /* alias de compatibilidad con nombres anteriores */
     --ink:var(--text);
     --ink-soft:var(--text-soft);
     --paper:var(--bg);
@@ -344,6 +345,21 @@
   .scan-btn:active{background:var(--surface-2);}
   #reader{border-radius:14px;overflow:hidden;}
   #reader video{border-radius:14px;}
+
+  /* ---- NUEVO: informe de ventas y selector de vendedor ---- */
+  .informe-fechas{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .informe-fechas label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:5px;}
+  .informe-fechas input,.select-field{
+    width:100%;border:1px solid var(--line);border-radius:12px;
+    padding:11px 12px;font-size:14.5px;font-family:'Inter',sans-serif;outline:none;
+    background:var(--bg);color:var(--ink);color-scheme:dark;
+  }
+  .informe-rapidos{display:flex;gap:8px;}
+  .informe-rapidos button{
+    flex:1;background:var(--surface-2);color:var(--accent);border:1px solid var(--line);
+    border-radius:12px;padding:11px;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .informe-rapidos button:disabled,.btn-check:disabled{opacity:.5;}
 </style>
 </head>
 <body>
@@ -415,7 +431,7 @@
         </div>
         <div class="choice-body">
           <h3>Precio Compra</h3>
-          <p>Solo para ti: costo, margen real y ganancia por equipo.</p>
+          <p>Solo para ti: costo, margen real, ganancia e informes de ventas.</p>
         </div>
         <span class="lock-tag">🔒 Privado</span>
       </div>
@@ -431,6 +447,22 @@
         <div class="role" id="search-sub">Busca el modelo</div>
       </div>
     </div>
+
+    <!-- NUEVO: informe de ventas (solo visible en Precio Compra) -->
+    <div class="promo-panel" id="informe-box" style="margin:16px 20px 0;">
+      <h4>📄 Informe de ventas</h4>
+      <div class="informe-rapidos">
+        <button type="button" id="btn-informe-hoy" onclick="informeHoy()">Hoy</button>
+        <button type="button" id="btn-informe-mes" onclick="informeMes()">Este mes</button>
+      </div>
+      <div class="informe-fechas">
+        <div><label>Desde</label><input id="informe-desde" type="date"></div>
+        <div><label>Hasta</label><input id="informe-hasta" type="date"></div>
+      </div>
+      <button class="btn-check" id="btn-informe" style="padding:13px;" onclick="generarInforme()">Generar PDF del rango</button>
+      <div class="promo-error" id="informe-msg"></div>
+    </div>
+
     <div class="search-wrap">
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -611,6 +643,10 @@
       <div class="promo-panel active">
         <h4>Datos de la venta</h4>
         <div class="login-field">
+          <label>Vendedor</label>
+          <select id="venta-vendedor" class="select-field"></select>
+        </div>
+        <div class="login-field">
           <label>Precio acordado (S/)</label>
           <input id="venta-precio" type="number" placeholder="0">
         </div>
@@ -636,7 +672,7 @@
         <input id="venta-correo" type="email" placeholder="correo@ejemplo.com" style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;outline:none;">
       </div>
 
-      <button class="btn-check" id="venta-btn-enviar" style="width:100%;padding:15px;border-radius:14px;font-size:15px;" onclick="enviarVenta()">Enviar resumen</button>
+      <button class="btn-check" id="venta-btn-enviar" style="width:100%;padding:15px;border-radius:14px;font-size:15px;" onclick="enviarVenta()">Registrar venta y enviar resumen</button>
       <div class="promo-error" id="venta-resultado"></div>
     </div>
   </section>
@@ -697,7 +733,9 @@ const CONFIG = {
   PIN_COMPRA: "767698",
   CARPETA_IMAGENES: "",
   LOGIN_USUARIO: "admin",
-  LOGIN_PASSWORD: "767698"
+  LOGIN_PASSWORD: "767698",
+  // >>> CAMBIA ESTOS NOMBRES POR LOS DE TUS VENDEDORES <<<
+  VENDEDORES: ["Vendedor 1", "Vendedor 2", "Vendedor 3"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -873,6 +911,16 @@ function goSearch(m){
   document.getElementById('results-count').textContent = '';
   document.getElementById('search-input').value = '';
   resetFiltroPrecio();
+
+  // Informe de ventas: solo visible en Precio Compra
+  document.getElementById('informe-box').classList.toggle('active', m === 'compra');
+  if (m === 'compra'){
+    const hoy = new Date();
+    document.getElementById('informe-desde').value = isoLocal(hoy);
+    document.getElementById('informe-hasta').value = isoLocal(hoy);
+    document.getElementById('informe-msg').classList.remove('active', 'error', 'exito');
+  }
+
   irA('screen-search');
   buscarModelos('');
   guardarUltimaPantalla();
@@ -1312,6 +1360,19 @@ async function consultarPromo(){
 
 let ventaProducto = null;
 
+function cargarVendedores(){
+  const sel = document.getElementById('venta-vendedor');
+  let ultimo = '';
+  try{ ultimo = localStorage.getItem('fs_ultimo_vendedor') || ''; }catch(e){}
+  sel.innerHTML = '<option value="">Selecciona vendedor</option>';
+  CONFIG.VENDEDORES.forEach(function(v){
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    if (v === ultimo) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
 function abrirVender(p, precioSugerido){
   if (!p) return;
   ventaProducto = p;
@@ -1328,6 +1389,7 @@ function abrirVender(p, precioSugerido){
   resBox.classList.remove('active', 'error', 'exito');
   resBox.textContent = '';
 
+  cargarVendedores();
   irA('screen-vender');
 }
 
@@ -1377,11 +1439,17 @@ async function enviarVenta(){
   const imei = document.getElementById('venta-imei').value;
   const telefono = document.getElementById('venta-telefono').value.trim();
   const correoCliente = document.getElementById('venta-correo').value.trim();
+  const vendedor = document.getElementById('venta-vendedor').value;
   const resBox = document.getElementById('venta-resultado');
   resBox.classList.remove('active', 'error', 'exito');
 
   if (!ventaProducto){
     resBox.textContent = 'No se encontró el equipo. Vuelve a intentarlo desde el detalle.';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  if (!vendedor){
+    resBox.textContent = 'Selecciona el vendedor.';
     resBox.classList.add('active', 'error');
     return;
   }
@@ -1403,7 +1471,7 @@ async function enviarVenta(){
 
   const btn = document.getElementById('venta-btn-enviar');
   btn.disabled = true;
-  btn.textContent = 'Enviando...';
+  btn.textContent = 'Registrando...';
 
   try{
     const params = [
@@ -1417,25 +1485,32 @@ async function enviarVenta(){
       'dni=' + encodeURIComponent(dni),
       'telefono=' + encodeURIComponent(telefono),
       'nombreCliente=' + encodeURIComponent(nombreCliente),
-      'correoCliente=' + encodeURIComponent(correoCliente)
+      'correoCliente=' + encodeURIComponent(correoCliente),
+      'vendedor=' + encodeURIComponent(vendedor)
     ].join('&');
 
     const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
-    const data = await jsonpRequest(url, 15000);
+    const data = await jsonpRequest(url, 25000);
 
     if (data.error){
       resBox.textContent = data.error;
       resBox.classList.add('active', 'error');
     } else {
-      resBox.textContent = '✅ Resumen enviado correctamente al correo del cliente.';
-      resBox.classList.add('active', 'exito');
+      try{ localStorage.setItem('fs_ultimo_vendedor', vendedor); }catch(e){}
+      if (data.aviso){
+        resBox.textContent = '⚠️ ' + data.aviso;
+        resBox.classList.add('active', 'error');
+      } else {
+        resBox.textContent = '✅ Venta registrada y resumen enviado al correo del cliente.';
+        resBox.classList.add('active', 'exito');
+      }
     }
   } catch(e){
-    resBox.textContent = 'No se pudo conectar. Intenta de nuevo.';
+    resBox.textContent = 'No se pudo confirmar la respuesta. Revisa la hoja Ventas antes de reintentar, para no duplicar.';
     resBox.classList.add('active', 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Enviar resumen';
+    btn.textContent = 'Registrar venta y enviar resumen';
   }
 }
 
@@ -1482,6 +1557,144 @@ function cerrarEscanerImei(){
       escanerImei.clear();
       escanerImei = null;
     }).catch(function(){ escanerImei = null; });
+  }
+}
+
+/* ===================== INFORME DE VENTAS (PDF) ===================== */
+
+function isoLocal(d){
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+function informeHoy(){
+  const hoy = isoLocal(new Date());
+  document.getElementById('informe-desde').value = hoy;
+  document.getElementById('informe-hasta').value = hoy;
+  generarInforme();
+}
+
+function informeMes(){
+  const n = new Date();
+  document.getElementById('informe-desde').value = isoLocal(new Date(n.getFullYear(), n.getMonth(), 1));
+  document.getElementById('informe-hasta').value = isoLocal(new Date(n.getFullYear(), n.getMonth() + 1, 0));
+  generarInforme();
+}
+
+async function generarInforme(){
+  const desde = document.getElementById('informe-desde').value;
+  const hasta = document.getElementById('informe-hasta').value;
+  const msg = document.getElementById('informe-msg');
+  const botones = [document.getElementById('btn-informe'), document.getElementById('btn-informe-hoy'), document.getElementById('btn-informe-mes')];
+  msg.classList.remove('active', 'error', 'exito');
+
+  if (!desde || !hasta){
+    msg.textContent = 'Elige las fechas "Desde" y "Hasta".';
+    msg.classList.add('active', 'error');
+    return;
+  }
+  if (desde > hasta){
+    msg.textContent = 'La fecha "Desde" no puede ser mayor que "Hasta".';
+    msg.classList.add('active', 'error');
+    return;
+  }
+  if (!window.jspdf){
+    msg.textContent = 'No cargó la librería del PDF. Revisa tu internet y recarga la página.';
+    msg.classList.add('active', 'error');
+    return;
+  }
+
+  botones.forEach(b => b.disabled = true);
+  const textoBtn = botones[0].textContent;
+  botones[0].textContent = 'Generando...';
+
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=informeRango&desde=' + encodeURIComponent(desde) + '&hasta=' + encodeURIComponent(hasta);
+    const data = await jsonpRequest(url, 20000);
+
+    if (data.error){
+      msg.textContent = data.error;
+      msg.classList.add('active', 'error');
+      return;
+    }
+    if (!data.ventas.length){
+      msg.textContent = 'No hay ventas registradas del ' + data.desde + ' al ' + data.hasta + '.';
+      msg.classList.add('active');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const ventas = data.ventas;
+    const total = ventas.reduce((s, v) => s + v.precio, 0);
+    const rangoTxt = (data.desde === data.hasta) ? data.desde : (data.desde + ' al ' + data.hasta);
+
+    doc.setFontSize(16);
+    doc.text('Better Comunication - Informe de ventas', 14, 16);
+    doc.setFontSize(11);
+    doc.text('Periodo: ' + rangoTxt + '    |    Equipos vendidos: ' + ventas.length + '    |    Total: S/ ' + total.toFixed(2), 14, 24);
+
+    doc.autoTable({
+      startY: 30,
+      head: [['Fecha', 'Hora', 'Vendedor', 'Cliente', 'Equipo', 'IMEI', 'Precio (S/)']],
+      body: ventas.map(v => [
+        v.fecha, v.hora, v.vendedor, v.cliente || '-',
+        v.marca + ' ' + v.modelo + ' ' + v.capacidad + ' ' + v.ram,
+        v.imei, v.precio.toFixed(2)
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [15, 168, 147] },
+      columnStyles: { 6: { halign: 'right' } }
+    });
+
+    // Resumen por vendedor
+    const porVend = {};
+    ventas.forEach(v => {
+      porVend[v.vendedor] = porVend[v.vendedor] || { n: 0, t: 0 };
+      porVend[v.vendedor].n++;
+      porVend[v.vendedor].t += v.precio;
+    });
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 10,
+      head: [['Vendedor', 'Equipos', 'Total (S/)']],
+      body: Object.keys(porVend).map(k => [k, porVend[k].n, porVend[k].t.toFixed(2)]),
+      foot: [['TOTAL DEL PERIODO', ventas.length, total.toFixed(2)]],
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [38, 43, 54] },
+      footStyles: { fillColor: [230, 230, 230], textColor: 20 },
+      tableWidth: 120
+    });
+
+    // Resumen por día (solo si el rango abarca varios días)
+    const porDia = {};
+    ventas.forEach(v => {
+      porDia[v.fecha] = porDia[v.fecha] || { n: 0, t: 0 };
+      porDia[v.fecha].n++;
+      porDia[v.fecha].t += v.precio;
+    });
+    const dias = Object.keys(porDia);
+    if (dias.length > 1){
+      doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [['Día', 'Equipos', 'Total (S/)']],
+        body: dias.map(k => [k, porDia[k].n, porDia[k].t.toFixed(2)]),
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [38, 43, 54] },
+        tableWidth: 120
+      });
+    }
+
+    const nombreArchivo = 'Informe_ventas_' + data.desde.replace(/\//g, '-') +
+      (data.desde === data.hasta ? '' : '_al_' + data.hasta.replace(/\//g, '-')) + '.pdf';
+    doc.save(nombreArchivo);
+    msg.textContent = '✅ Informe descargado (' + ventas.length + ' ventas, S/ ' + total.toFixed(2) + ').';
+    msg.classList.add('active', 'exito');
+  } catch(e){
+    msg.textContent = 'No se pudo generar el informe. Intenta de nuevo.';
+    msg.classList.add('active', 'error');
+  } finally {
+    botones.forEach(b => b.disabled = false);
+    botones[0].textContent = textoBtn;
   }
 }
 </script>
