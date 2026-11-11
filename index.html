@@ -678,14 +678,14 @@
         </div>
         <div id="bloque-cuotas" style="display:none;">
           <div class="login-field">
-            <label>Monto financiado (S/) · lo paga Payjoy</label>
+            <label>Monto financiado (S/) · es el precio de la venta</label>
             <input id="venta-financiado" type="number" inputmode="decimal" placeholder="0" oninput="actualizarTotalCuotas()">
           </div>
           <div class="login-field">
-            <label>Monto inicial (S/) · lo paga el cliente hoy</label>
+            <label>Monto inicial (S/) · parte del monto financiado</label>
             <input id="venta-inicial" type="number" inputmode="decimal" placeholder="0" oninput="actualizarTotalCuotas()">
           </div>
-          <p class="hint" id="venta-total-cuotas" style="margin-top:0;">Total de la venta: S/ 0.00</p>
+          <p class="hint" id="venta-total-cuotas" style="margin-top:0;">Precio de la venta: S/ 0.00</p>
         </div>
         <div class="login-field">
           <label>IMEI del equipo (15 dígitos)</label>
@@ -777,7 +777,7 @@ const CONFIG = {
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
   // Lista de vendedores (aparece en el selector del formulario de venta)
-  VENDEDORES: ["JHON PERCCA", "JHELSYN CARDENAS", "MARICELA TAFUR", "MOISES SEBASTIAN"]
+  VENDEDORES: ["JHON PERCCA", "JHELSYN CARDENAS", "MARICEL TAFUR", "MOISES SEBASTIAN"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -1031,9 +1031,7 @@ async function buscarModelos(q){
     }
 
     ultimosResultados = data.resultados || [];
-    ultimosResultados.sort((a, b) =>
-      (a.marca + ' ' + a.modelo).localeCompare(b.marca + ' ' + b.modelo, 'es', { sensitivity: 'base' })
-    );
+    ultimosResultados.sort(compararEquipos);
     ultimosResultados.forEach(p => { if (p.marca) marcasConocidas.add(String(p.marca).trim()); });
     renderChipsMarcas(ultimosResultados);
     renderResultados(aplicarFiltroPrecio(ultimosResultados));
@@ -1042,6 +1040,30 @@ async function buscarModelos(q){
     if (miReqId !== searchReqId) return;
     list.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>No se pudo conectar. Revisa tu conexión o la URL configurada.</div>';
   }
+}
+
+// ---- Orden del catálogo: marca -> modelo -> memoria (menor a mayor) -> RAM (menor a mayor) ----
+function aGB(texto){
+  const m = String(texto == null ? '' : texto).replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(TB|GB|MB)?/i);
+  if (!m) return Infinity;                       // sin dato: va al final de su grupo
+  let n = parseFloat(m[1]);
+  const u = (m[2] || 'GB').toUpperCase();
+  if (u === 'TB') n *= 1024;
+  else if (u === 'MB') n /= 1024;
+  return n;
+}
+
+function compararEquipos(a, b){
+  const txt = { sensitivity: 'base', numeric: true };   // numeric: "X7" va antes que "X10"
+  let r = String(a.marca || '').localeCompare(String(b.marca || ''), 'es', txt);
+  if (r !== 0) return r;
+  r = String(a.modelo || '').localeCompare(String(b.modelo || ''), 'es', txt);
+  if (r !== 0) return r;
+  const ca = aGB(a.capacidad), cb = aGB(b.capacidad);
+  if (ca !== cb) return ca === Infinity ? 1 : (cb === Infinity ? -1 : ca - cb);
+  const ra = aGB(a.ram), rb = aGB(b.ram);
+  if (ra !== rb) return ra === Infinity ? 1 : (rb === Infinity ? -1 : ra - rb);
+  return 0;
 }
 
 function renderResultados(resultados){
@@ -1266,7 +1288,7 @@ async function buscarParaComparar(q){
   try{
     const url = CONFIG.APPS_SCRIPT_URL + '?action=buscar&q=' + encodeURIComponent(q);
     const data = await jsonpRequest(url);
-    const resultados = (data.resultados || []).filter(p => p.id !== cmpA.id);
+    const resultados = (data.resultados || []).filter(p => p.id !== cmpA.id).sort(compararEquipos);
 
     if (resultados.length === 0){
       list.innerHTML = '<div class="empty-state"><div class="big-emoji">🔍</div>No se encontró ningún modelo.</div>';
@@ -1482,7 +1504,8 @@ function cambiarTipoVenta(){
 function actualizarTotalCuotas(){
   const fin = parseFloat(document.getElementById('venta-financiado').value) || 0;
   const ini = parseFloat(document.getElementById('venta-inicial').value) || 0;
-  document.getElementById('venta-total-cuotas').textContent = 'Total de la venta: S/ ' + (fin + ini).toFixed(2);
+  const pct = fin > 0 ? ' · Inicial: ' + (Math.round(ini / fin * 1000) / 10) + '% del financiado' : '';
+  document.getElementById('venta-total-cuotas').textContent = 'Precio de la venta: S/ ' + fin.toFixed(2) + pct;
 }
 
 // Sugerencias de proveedores usados antes en este teléfono (solo ayuda a escribir; es opcional)
@@ -1690,7 +1713,12 @@ async function enviarVenta(){
       resBox.classList.add('active', 'error');
       return;
     }
-    precioEnviar = String(Math.round((parseFloat(financiado) + parseFloat(inicial)) * 100) / 100);
+    if (parseFloat(inicial) > parseFloat(financiado)){
+      resBox.textContent = 'El monto inicial no puede ser mayor que el monto financiado.';
+      resBox.classList.add('active', 'error');
+      return;
+    }
+    precioEnviar = String(Math.round(parseFloat(financiado) * 100) / 100); // el precio es el monto financiado
   } else if (!precio){
     resBox.textContent = 'Ingresa el precio acordado.';
     resBox.classList.add('active', 'error');
