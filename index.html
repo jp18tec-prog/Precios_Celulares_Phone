@@ -665,8 +665,27 @@
           <select id="venta-vendedor" class="select-field"></select>
         </div>
         <div class="login-field">
+          <label>Tipo de venta</label>
+          <select id="venta-tipo" class="select-field" onchange="cambiarTipoVenta()">
+            <option value="">Selecciona: contado o cuotas</option>
+            <option value="Contado">Al contado</option>
+            <option value="Cuotas (Payjoy)">En cuotas (Payjoy)</option>
+          </select>
+        </div>
+        <div class="login-field" id="bloque-contado" style="display:none;">
           <label>Precio acordado (S/)</label>
-          <input id="venta-precio" type="number" placeholder="0">
+          <input id="venta-precio" type="number" inputmode="decimal" placeholder="0">
+        </div>
+        <div id="bloque-cuotas" style="display:none;">
+          <div class="login-field">
+            <label>Monto financiado (S/) · lo paga Payjoy</label>
+            <input id="venta-financiado" type="number" inputmode="decimal" placeholder="0" oninput="actualizarTotalCuotas()">
+          </div>
+          <div class="login-field">
+            <label>Monto inicial (S/) · lo paga el cliente hoy</label>
+            <input id="venta-inicial" type="number" inputmode="decimal" placeholder="0" oninput="actualizarTotalCuotas()">
+          </div>
+          <p class="hint" id="venta-total-cuotas" style="margin-top:0;">Total de la venta: S/ 0.00</p>
         </div>
         <div class="login-field">
           <label>IMEI del equipo (15 dígitos)</label>
@@ -681,6 +700,11 @@
         <div class="login-field">
           <label>Teléfono del cliente</label>
           <input id="venta-telefono" type="tel" inputmode="numeric" maxlength="9" placeholder="Ej: 912854798" oninput="this.value=this.value.replace(/\D/g,'').slice(0,9)">
+        </div>
+        <div class="login-field">
+          <label>Proveedor (opcional)</label>
+          <input id="venta-proveedor" type="text" list="lista-proveedores" placeholder="Nombre del proveedor" autocomplete="off">
+          <datalist id="lista-proveedores"></datalist>
         </div>
       </div>
 
@@ -753,7 +777,7 @@ const CONFIG = {
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
   // Lista de vendedores (aparece en el selector del formulario de venta)
-  VENDEDORES: ["Jhon Percca", "Jhelsyn Cardenas", "Maricela Tafur", "Moises Sebastian"]
+  VENDEDORES: ["JHON PERCCA", "JHELSYN CARDENAS", "MARICELA TAFUR", "MOISES SEBASTIAN"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -1448,6 +1472,42 @@ function dniVentaCambio(){
   }
 }
 
+function cambiarTipoVenta(){
+  const tipo = document.getElementById('venta-tipo').value;
+  document.getElementById('bloque-contado').style.display = (tipo === 'Contado') ? 'block' : 'none';
+  document.getElementById('bloque-cuotas').style.display = (tipo === 'Cuotas (Payjoy)') ? 'block' : 'none';
+  actualizarTotalCuotas();
+}
+
+function actualizarTotalCuotas(){
+  const fin = parseFloat(document.getElementById('venta-financiado').value) || 0;
+  const ini = parseFloat(document.getElementById('venta-inicial').value) || 0;
+  document.getElementById('venta-total-cuotas').textContent = 'Total de la venta: S/ ' + (fin + ini).toFixed(2);
+}
+
+// Sugerencias de proveedores usados antes en este teléfono (solo ayuda a escribir; es opcional)
+function cargarProveedores(){
+  let lista = [];
+  try{ lista = JSON.parse(localStorage.getItem('fs_proveedores') || '[]'); }catch(e){}
+  const dl = document.getElementById('lista-proveedores');
+  dl.innerHTML = '';
+  lista.forEach(function(n){
+    const o = document.createElement('option');
+    o.value = n;
+    dl.appendChild(o);
+  });
+}
+
+function recordarProveedor(nombre){
+  const n = (nombre || '').replace(/\s+/g, ' ').trim().toUpperCase();
+  if (!n) return;
+  try{
+    let lista = JSON.parse(localStorage.getItem('fs_proveedores') || '[]');
+    lista = [n].concat(lista.filter(function(x){ return x !== n; })).slice(0, 30);
+    localStorage.setItem('fs_proveedores', JSON.stringify(lista));
+  }catch(e){}
+}
+
 function cargarVendedores(){
   const sel = document.getElementById('venta-vendedor');
   let ultimo = '';
@@ -1503,6 +1563,12 @@ function abrirVender(p, precioSugerido){
   resBox.textContent = '';
 
   cargarVendedores();
+  document.getElementById('venta-tipo').value = '';
+  document.getElementById('venta-financiado').value = '';
+  document.getElementById('venta-inicial').value = '';
+  document.getElementById('venta-proveedor').value = '';
+  cambiarTipoVenta();
+  cargarProveedores();
   irA('screen-vender');
 }
 
@@ -1577,6 +1643,13 @@ async function enviarVenta(){
     resBox.classList.add('active', 'error');
     return;
   }
+  const tipoVenta = document.getElementById('venta-tipo').value;
+  if (!tipoVenta){
+    resBox.textContent = 'Selecciona el tipo de venta (al contado o en cuotas).';
+    resBox.classList.add('active', 'error');
+    return;
+  }
+  const proveedor = document.getElementById('venta-proveedor').value.replace(/\s+/g, ' ').trim();
   const norm = function(t){ return (t || '').replace(/\s+/g, ' ').trim(); };
   let equipo;
   if (ventaProducto.manual){
@@ -1601,7 +1674,24 @@ async function enviarVenta(){
     resBox.classList.add('active', 'error');
     return;
   }
-  if (!precio){
+  let precioEnviar = precio;
+  let financiado = '';
+  let inicial = '';
+  if (tipoVenta === 'Cuotas (Payjoy)'){
+    financiado = document.getElementById('venta-financiado').value;
+    inicial = document.getElementById('venta-inicial').value;
+    if (!(parseFloat(financiado) > 0)){
+      resBox.textContent = 'Ingresa el monto financiado.';
+      resBox.classList.add('active', 'error');
+      return;
+    }
+    if (inicial === '' || !(parseFloat(inicial) >= 0)){
+      resBox.textContent = 'Ingresa el monto inicial (si no hay, pon 0).';
+      resBox.classList.add('active', 'error');
+      return;
+    }
+    precioEnviar = String(Math.round((parseFloat(financiado) + parseFloat(inicial)) * 100) / 100);
+  } else if (!precio){
     resBox.textContent = 'Ingresa el precio acordado.';
     resBox.classList.add('active', 'error');
     return;
@@ -1624,13 +1714,17 @@ async function enviarVenta(){
       'capacidad=' + encodeURIComponent(equipo.capacidad),
       'ram=' + encodeURIComponent(equipo.ram),
       'idProducto=' + encodeURIComponent(equipo.id || ''),
-      'precio=' + encodeURIComponent(precio),
+      'precio=' + encodeURIComponent(precioEnviar),
       'imei=' + encodeURIComponent(imei),
       'dni=' + encodeURIComponent(dni),
       'telefono=' + encodeURIComponent(telefono),
       'nombreCliente=' + encodeURIComponent(nombreCliente),
       'correoCliente=' + encodeURIComponent(correoCliente),
-      'vendedor=' + encodeURIComponent(vendedor)
+      'vendedor=' + encodeURIComponent(vendedor),
+      'tipoVenta=' + encodeURIComponent(tipoVenta),
+      'proveedor=' + encodeURIComponent(proveedor),
+      'montoFinanciado=' + encodeURIComponent(financiado),
+      'montoInicial=' + encodeURIComponent(inicial)
     ].join('&');
 
     const url = CONFIG.APPS_SCRIPT_URL + '?' + params;
@@ -1641,6 +1735,7 @@ async function enviarVenta(){
       resBox.classList.add('active', 'error');
     } else {
       try{ localStorage.setItem('fs_ultimo_vendedor', vendedor); }catch(e){}
+      recordarProveedor(proveedor);
       clienteActual = null;
       if (data.aviso){
         resBox.textContent = '⚠️ ' + data.aviso;
@@ -1786,15 +1881,16 @@ async function generarInforme(){
 
     doc.autoTable({
       startY: 33,
-      head: [['Fecha', 'Hora', 'Vendedor', 'Cliente', 'Equipo', 'IMEI', 'Precio (S/)', 'Ganancia (S/)']],
+      head: [['Fecha', 'Hora', 'Vendedor', 'Cliente', 'Equipo', 'IMEI', 'Pago', 'Proveedor', 'Precio (S/)', 'Ganancia (S/)']],
       body: ventas.map(v => [
         v.fecha, v.hora, v.vendedor, v.cliente || '-',
         [v.marca, v.modelo, v.capacidad, v.ram].filter(x => x && String(x).trim()).join(' ') + (v.origen === 'Manual' ? ' [M]' : ''),
-        v.imei, v.precio.toFixed(2), v.ganancia != null ? v.ganancia.toFixed(2) : '-'
+        v.imei, (v.tipoVenta ? (v.tipoVenta.indexOf('Cuotas') === 0 ? 'Cuotas' : 'Contado') : '-'), v.proveedor || '-',
+        v.precio.toFixed(2), v.ganancia != null ? v.ganancia.toFixed(2) : '-'
       ]),
-      styles: { fontSize: 8.5 },
+      styles: { fontSize: 8 },
       headStyles: { fillColor: [15, 168, 147] },
-      columnStyles: { 6: { halign: 'right' }, 7: { halign: 'right' } }
+      columnStyles: { 8: { halign: 'right' }, 9: { halign: 'right' } }
     });
 
     // Resumen por vendedor
