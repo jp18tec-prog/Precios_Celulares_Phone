@@ -360,6 +360,12 @@
     border-radius:12px;padding:11px;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;
   }
   .informe-rapidos button:disabled,.btn-check:disabled{opacity:.5;}
+  .tabs-compra{display:none;gap:8px;padding:14px 20px 0;}
+  .tab-compra{
+    flex:1;background:var(--card);color:var(--ink-soft);border:1px solid var(--line);
+    border-radius:12px;padding:11px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .tab-compra.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700;}
 </style>
 </head>
 <body>
@@ -430,8 +436,8 @@
           <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="2"/></svg>
         </div>
         <div class="choice-body">
-          <h3>Precio Compra</h3>
-          <p>Solo para ti: costo, margen real, ganancia e informes de ventas.</p>
+          <h3>Ventas y costos</h3>
+          <p>Solo para ti: ventas por fecha, informes en PDF, costos y margen por equipo.</p>
         </div>
         <span class="lock-tag">🔒 Privado</span>
       </div>
@@ -448,22 +454,40 @@
       </div>
     </div>
 
-    <!-- NUEVO: informe de ventas (solo visible en Precio Compra) -->
-    <div class="promo-panel" id="informe-box" style="margin:16px 20px 0;">
-      <h4>📄 Informe de ventas</h4>
-      <div class="informe-rapidos">
-        <button type="button" id="btn-informe-hoy" onclick="informeHoy()">Hoy</button>
-        <button type="button" id="btn-informe-mes" onclick="informeMes()">Este mes</button>
-      </div>
-      <div class="informe-fechas">
-        <div><label>Desde</label><input id="informe-desde" type="date"></div>
-        <div><label>Hasta</label><input id="informe-hasta" type="date"></div>
-      </div>
-      <button class="btn-check" id="btn-informe" style="padding:13px;" onclick="generarInforme()">Generar PDF del rango</button>
-      <div class="promo-error" id="informe-msg"></div>
+    <!-- Pestañas del módulo privado (solo se ven con el PIN) -->
+    <div class="tabs-compra" id="tabs-compra">
+      <button type="button" class="tab-compra active" id="tab-ventas" onclick="cambiarTabCompra('ventas')">Ventas</button>
+      <button type="button" class="tab-compra" id="tab-precios" onclick="cambiarTabCompra('precios')">Precios de compra</button>
     </div>
 
-    <div class="search-wrap">
+    <!-- Pestaña VENTAS: lista por fechas + PDF -->
+    <div id="ventas-view" style="display:none;padding:16px 20px 24px;flex-direction:column;gap:14px;">
+      <div class="informe-rapidos">
+        <button type="button" onclick="verHoy()">Hoy</button>
+        <button type="button" onclick="verMes()">Este mes</button>
+      </div>
+      <div class="informe-fechas">
+        <div><label>Desde</label><input id="informe-desde" type="date" onchange="cargarVentasPantalla()"></div>
+        <div><label>Hasta</label><input id="informe-hasta" type="date" onchange="cargarVentasPantalla()"></div>
+      </div>
+      <div class="owner-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="owner-box"><div class="k">Ventas</div><div class="v" id="vr-n" style="font-size:16px;">0</div></div>
+        <div class="owner-box"><div class="k">Total (S/)</div><div class="v" id="vr-total" style="font-size:16px;">0.00</div></div>
+        <div class="owner-box margin"><div class="k">Ganancia (S/)</div><div class="v" id="vr-gan" style="font-size:16px;">0.00</div></div>
+      </div>
+      <div class="promo-panel active" id="informe-box">
+        <h4>📄 Imprimir informe (PDF)</h4>
+        <div class="informe-rapidos">
+          <button type="button" id="btn-informe-hoy" onclick="informeHoy()">PDF de hoy</button>
+          <button type="button" id="btn-informe-mes" onclick="informeMes()">PDF del mes</button>
+        </div>
+        <button class="btn-check" id="btn-informe" style="padding:13px;" onclick="generarInforme()">PDF del rango elegido</button>
+        <div class="promo-error" id="informe-msg"></div>
+      </div>
+      <div id="ventas-lista" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <div class="search-wrap" id="search-wrap">
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input id="search-input" type="text" placeholder="Ej: Redmi, iPhone 17, S25 Ultra..." oninput="onSearchInput()">
@@ -747,7 +771,7 @@
   <div class="pin-overlay" id="pin-overlay">
     <div class="pin-box">
       <h3>Acceso privado</h3>
-      <p>Esta sección muestra tus precios de compra. Ingresa tu PIN.</p>
+      <p>Esta sección muestra tus ventas, ganancias y precios de compra. Ingresa tu PIN.</p>
       <input id="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
       <div class="pin-actions">
         <button class="pin-cancel" onclick="closePin()">Cancelar</button>
@@ -777,7 +801,7 @@ const CONFIG = {
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
   // Lista de vendedores (aparece en el selector del formulario de venta)
-  VENDEDORES: ["JHON PERCCA", "JHELSYN CARDENAS", "MARICEL TAFUR", "MOISES SEBASTIAN", "NELI"]
+  VENDEDORES: ["JHON PERCCA", "JHEYSLIN CARDENAS", "MARICELA TAFUR", "MOISES SEBASTIAN", "NELI", "ALEXANDRA"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -957,21 +981,24 @@ async function restaurarUltimaPantalla(){
 
 function goSearch(m){
   modo = m;
-  document.getElementById('search-title').textContent = m === 'venta' ? 'Precio Venta' : 'Precio Compra';
+  document.getElementById('search-title').textContent = m === 'venta' ? 'Precio Venta' : 'Ventas y costos';
   document.getElementById('search-sub').textContent = m === 'venta' ? 'Esto lo ve el cliente' : 'Solo para ti';
   document.getElementById('results-list').innerHTML = '';
   document.getElementById('results-count').textContent = '';
   document.getElementById('search-input').value = '';
   resetFiltroPrecio();
 
-  // Informe de ventas: solo visible en Precio Compra
-  document.getElementById('informe-box').classList.toggle('active', m === 'compra');
   document.getElementById('manual-box').style.display = (m === 'venta') ? 'block' : 'none';
+  document.getElementById('tabs-compra').style.display = (m === 'compra') ? 'flex' : 'none';
   if (m === 'compra'){
     const hoy = new Date();
     document.getElementById('informe-desde').value = isoLocal(hoy);
     document.getElementById('informe-hasta').value = isoLocal(hoy);
     document.getElementById('informe-msg').classList.remove('active', 'error', 'exito');
+    cambiarTabCompra('ventas');   // abre en Ventas, con las ventas de hoy
+  } else {
+    document.getElementById('ventas-view').style.display = 'none';
+    mostrarBusqueda(true);
   }
 
   irA('screen-search');
@@ -1836,10 +1863,130 @@ function isoLocal(d){
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
+/* ===================== MÓDULO PRIVADO: pestañas y lista de ventas ===================== */
+
+function mostrarBusqueda(visible){
+  ['search-wrap', 'price-filters', 'results-count', 'results-list'].forEach(function(id){
+    document.getElementById(id).style.display = visible ? '' : 'none';
+  });
+}
+
+function cambiarTabCompra(tab){
+  const ventas = (tab === 'ventas');
+  document.getElementById('tab-ventas').classList.toggle('active', ventas);
+  document.getElementById('tab-precios').classList.toggle('active', !ventas);
+  document.getElementById('ventas-view').style.display = ventas ? 'flex' : 'none';
+  mostrarBusqueda(!ventas);
+  document.getElementById('search-sub').textContent = ventas ? 'Ventas por fecha · solo para ti' : 'Precios de compra · solo para ti';
+  if (ventas) cargarVentasPantalla();
+}
+
+function verHoy(){
+  const hoy = isoLocal(new Date());
+  document.getElementById('informe-desde').value = hoy;
+  document.getElementById('informe-hasta').value = hoy;
+  cargarVentasPantalla();
+}
+
+function verMes(){
+  const n = new Date();
+  document.getElementById('informe-desde').value = isoLocal(new Date(n.getFullYear(), n.getMonth(), 1));
+  document.getElementById('informe-hasta').value = isoLocal(new Date(n.getFullYear(), n.getMonth() + 1, 0));
+  cargarVentasPantalla();
+}
+
+let cargaVentasId = 0;
+
+async function cargarVentasPantalla(){
+  const desde = document.getElementById('informe-desde').value;
+  const hasta = document.getElementById('informe-hasta').value;
+  const lista = document.getElementById('ventas-lista');
+
+  if (!desde || !hasta){
+    lista.innerHTML = '<div class="empty-state">Elige las fechas Desde y Hasta.</div>';
+    return;
+  }
+  if (desde > hasta){
+    lista.innerHTML = '<div class="empty-state">La fecha "Desde" no puede ser mayor que "Hasta".</div>';
+    return;
+  }
+
+  const miId = ++cargaVentasId;
+  lista.innerHTML = '<div class="loading">Cargando ventas...</div>';
+
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=informeRango&desde=' + encodeURIComponent(desde) + '&hasta=' + encodeURIComponent(hasta);
+    const data = await jsonpRequest(url, 20000);
+    if (miId !== cargaVentasId) return;   // llegó una respuesta más nueva
+    if (data.error){
+      lista.innerHTML = '';
+      lista.appendChild(crearEl('div', 'empty-state', data.error));
+      return;
+    }
+    renderVentasPantalla(data);
+  } catch(e){
+    if (miId !== cargaVentasId) return;
+    lista.innerHTML = '<div class="empty-state"><div class="big-emoji">⚠️</div>No se pudieron cargar las ventas. Revisa tu conexión.</div>';
+  }
+}
+
+function crearEl(tag, clase, texto, estilo){
+  const e = document.createElement(tag);
+  if (clase) e.className = clase;
+  if (texto != null) e.textContent = texto;
+  if (estilo) e.style.cssText = estilo;
+  return e;
+}
+
+function renderVentasPantalla(data){
+  const lista = document.getElementById('ventas-lista');
+  const ventas = data.ventas || [];
+  const total = ventas.reduce((s, v) => s + v.precio, 0);
+  const gan = ventas.reduce((s, v) => s + (v.ganancia != null ? v.ganancia : 0), 0);
+  document.getElementById('vr-n').textContent = ventas.length;
+  document.getElementById('vr-total').textContent = total.toFixed(2);
+  document.getElementById('vr-gan').textContent = gan.toFixed(2);
+
+  lista.innerHTML = '';
+  if (!ventas.length){
+    const vacio = crearEl('div', 'empty-state');
+    vacio.appendChild(crearEl('div', 'big-emoji', '🧾'));
+    vacio.appendChild(document.createTextNode('No hay ventas registradas del ' + data.desde + ' al ' + data.hasta + '.'));
+    lista.appendChild(vacio);
+    return;
+  }
+
+  const variosDias = data.desde !== data.hasta;
+  ventas.slice().reverse().forEach(function(v){   // la más reciente primero
+    const card = crearEl('div', 'result-card', null, 'cursor:default;align-items:flex-start;');
+    const izq = crearEl('div', null, null, 'min-width:0;flex:1;');
+    izq.appendChild(crearEl('div', null, (variosDias ? v.fecha + ' · ' : '') + v.hora + ' · ' + v.vendedor, 'font-size:11px;color:var(--ink-soft);'));
+
+    const equipo = [v.marca, v.modelo, v.capacidad, v.ram].filter(x => x && String(x).trim()).join(' ') + (v.origen === 'Manual' ? ' [M]' : '');
+    izq.appendChild(crearEl('div', null, equipo, 'font-weight:600;font-size:14px;margin:2px 0;'));
+
+    let pago = '';
+    if (v.tipoVenta === 'Cuotas (Payjoy)') pago = 'Cuotas Payjoy' + (v.montoInicial != null ? ' · inicial S/' + v.montoInicial : '');
+    else if (v.tipoVenta) pago = v.tipoVenta;
+    const sub = [v.cliente || 'Sin nombre', pago, v.proveedor ? 'Prov: ' + v.proveedor : ''].filter(Boolean).join(' · ');
+    izq.appendChild(crearEl('div', null, sub, 'font-size:12px;color:var(--ink-soft);'));
+    izq.appendChild(crearEl('div', null, 'IMEI ' + v.imei, 'font-size:11px;color:var(--ink-soft);margin-top:2px;'));
+
+    const der = crearEl('div', null, null, 'text-align:right;flex-shrink:0;');
+    der.appendChild(crearEl('div', 'num', 'S/' + v.precio.toFixed(2), 'font-size:16px;font-weight:700;'));
+    if (v.ganancia != null) der.appendChild(crearEl('div', null, 'Gan. S/' + v.ganancia.toFixed(2), 'font-size:11.5px;color:var(--accent);margin-top:2px;'));
+
+    card.appendChild(izq);
+    card.appendChild(der);
+    lista.appendChild(card);
+  });
+}
+
 function informeHoy(){
   const hoy = isoLocal(new Date());
   document.getElementById('informe-desde').value = hoy;
   document.getElementById('informe-hasta').value = hoy;
+  cargarVentasPantalla();
   generarInforme();
 }
 
@@ -1847,6 +1994,7 @@ function informeMes(){
   const n = new Date();
   document.getElementById('informe-desde').value = isoLocal(new Date(n.getFullYear(), n.getMonth(), 1));
   document.getElementById('informe-hasta').value = isoLocal(new Date(n.getFullYear(), n.getMonth() + 1, 0));
+  cargarVentasPantalla();
   generarInforme();
 }
 
