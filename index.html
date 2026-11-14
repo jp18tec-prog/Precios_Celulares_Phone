@@ -801,7 +801,7 @@ const CONFIG = {
   LOGIN_USUARIO: "admin",
   LOGIN_PASSWORD: "767698",
   // Lista de vendedores (aparece en el selector del formulario de venta)
-  VENDEDORES: ["JHON PERCCA", "JHEYSLIN CARDENAS", "MARICELA TAFUR", "MOISES SEBASTIAN", "NELI", "ALEXANDRA"]
+  VENDEDORES: ["JHON PERCCA", "JHELSIN CARDENAS", "MARICELA TAFUR", "MOISES SEBASTIAN", "ALEXANDRA", "NELI"]
 };
 
 const IMG_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -1059,7 +1059,7 @@ async function buscarModelos(q){
 
     ultimosResultados = data.resultados || [];
     ultimosResultados.sort(compararEquipos);
-    ultimosResultados.forEach(p => { if (p.marca) marcasConocidas.add(String(p.marca).trim()); });
+    ultimosResultados.forEach(p => { if (p.marca) marcasConocidas.add(limpiarTxt(p.marca)); });
     renderChipsMarcas(ultimosResultados);
     renderResultados(aplicarFiltroPrecio(ultimosResultados));
 
@@ -1082,9 +1082,9 @@ function aGB(texto){
 
 function compararEquipos(a, b){
   const txt = { sensitivity: 'base', numeric: true };   // numeric: "X7" va antes que "X10"
-  let r = String(a.marca || '').localeCompare(String(b.marca || ''), 'es', txt);
+  let r = normTxt(a.marca).localeCompare(normTxt(b.marca), 'es', txt);
   if (r !== 0) return r;
-  r = String(a.modelo || '').localeCompare(String(b.modelo || ''), 'es', txt);
+  r = normTxt(a.modelo).localeCompare(normTxt(b.modelo), 'es', txt);
   if (r !== 0) return r;
   const ca = aGB(a.capacidad), cb = aGB(b.capacidad);
   if (ca !== cb) return ca === Infinity ? 1 : (cb === Infinity ? -1 : ca - cb);
@@ -1132,15 +1132,29 @@ function resetFiltroPrecio(){   // se llama al abrir la búsqueda (nombre conser
   document.getElementById('price-filters').innerHTML = '';
 }
 
+// Limpia un texto: quita caracteres invisibles, espacios dobles/sobrantes (NBSP incluido)
+function limpiarTxt(t){
+  return String(t == null ? '' : t)
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+// Clave para comparar: igual que limpiarTxt pero sin diferencia de mayúsculas
+function normTxt(t){ return limpiarTxt(t).toUpperCase(); }
+
 function renderChipsMarcas(lista){
   const cont = document.getElementById('price-filters');
   const scrollPrevio = cont.scrollLeft;
-  const conteo = {};
+  const conteo = {};     // clave normalizada -> cantidad
+  const nombre = {};     // clave normalizada -> texto a mostrar
   lista.forEach(p => {
-    const m = (p.marca || '').toString().trim();
-    if (m) conteo[m] = (conteo[m] || 0) + 1;
+    const k = normTxt(p.marca);
+    if (!k) return;
+    conteo[k] = (conteo[k] || 0) + 1;
+    if (!nombre[k]) nombre[k] = limpiarTxt(p.marca);
   });
-  const marcas = Object.keys(conteo).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  const claves = Object.keys(conteo).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   if (filtroMarcaActiva !== 'todas' && !conteo[filtroMarcaActiva]) filtroMarcaActiva = 'todas';
 
   cont.innerHTML = '';
@@ -1152,7 +1166,7 @@ function renderChipsMarcas(lista){
     cont.appendChild(chip);
   };
   crear('todas', 'Todas (' + lista.length + ')');
-  marcas.forEach(m => crear(m, m + ' (' + conteo[m] + ')'));
+  claves.forEach(k => crear(k, nombre[k] + ' (' + conteo[k] + ')'));
   cont.scrollLeft = scrollPrevio;
 }
 
@@ -1164,7 +1178,7 @@ function seleccionarMarca(marca){
 
 function aplicarFiltroPrecio(lista){   // ahora filtra por marca (nombre conservado)
   if (filtroMarcaActiva === 'todas') return lista;
-  return lista.filter(p => (p.marca || '').toString().trim() === filtroMarcaActiva);
+  return lista.filter(p => normTxt(p.marca) === filtroMarcaActiva);
 }
 
 let listaActualDetalle = [];
