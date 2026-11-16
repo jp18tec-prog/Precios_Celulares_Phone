@@ -176,6 +176,8 @@
     cursor:pointer;
   }
   .result-card:active{background:var(--surface-2);}
+  .result-card .result-info{flex:1;min-width:0;}
+  .dni-row input{min-width:0;}
   .result-info .brand-tag{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
   .result-info .model-name{font-weight:600;font-size:14.5px;margin:2px 0;}
   .result-info .specs{font-size:12px;color:var(--ink-soft);}
@@ -432,50 +434,108 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  /* ===================== TABLET / PANTALLAS GRANDES ===================== */
-  @media (min-width:768px){
-    .app{max-width:900px;border-left:1px solid var(--line);border-right:1px solid var(--line);}
-    .home-hero{padding:40px 36px 34px;}
-    .home-hero h1{font-size:30px;}
-    .home-cards{flex-direction:row;padding:26px 36px 32px;gap:18px;}
-    .home-cards .choice-card{flex:1;}
+  /* ===================== TABLET (vertical y horizontal) ===================== */
+  /* Desde 600 px de ancho (tablet de 10" en vertical) la app ocupa TODA la pantalla */
+  @media (min-width:600px){
+    .app{max-width:none;width:100%;border:none;}
     .topbar{padding:18px 32px 14px;}
-    .search-wrap{padding:16px 32px;}
-    .price-filters{padding:0 32px 12px;}
-    .results-count{padding:0 32px;}
-    .results-list{padding:0 32px 28px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start;}
-    #manual-box{padding:0 32px 12px !important;}
-    .tabs-compra{padding:14px 32px 0;}
-    #ventas-view{padding:16px 32px 28px !important;}
-    #ventas-lista{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start;}
-    .detail-body{padding:28px 32px;}
 
-    /* Detalle del equipo: foto a la izquierda, datos y botones a la derecha */
-    #detail-body-venta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;row-gap:16px;align-items:start;}
+    /* Inicio */
+    .home-hero{padding:44px 40px 52px;border-radius:0 0 40px 40px;}
+    .home-hero h1{font-size:38px;max-width:560px;}
+    .home-hero .brand-text .name{font-size:20px;}
+    .hero-mark{width:54px;height:54px;border-radius:16px;}
+    .hero-mark svg{width:28px;height:28px;}
+    .hero-date{font-size:14px;padding:8px 16px;}
+    .home-cards{padding:0 40px 32px;margin-top:-26px;gap:20px;width:100%;max-width:960px;align-self:center;}
+    .choice-card{padding:28px;gap:20px;}
+    .choice-icon{width:68px;height:68px;border-radius:20px;}
+    .choice-icon svg{width:32px;height:32px;}
+    .choice-body h3{font-size:22px;}
+    .choice-body p{font-size:15px;}
+    .choice-tags span{font-size:13px;padding:6px 12px;}
+    .choice-arrow{width:40px;height:40px;font-size:24px;}
+    .home-footer{font-size:12.5px;}
+
+    /* Catálogo */
+    .search-wrap{padding:16px 32px;}
+    .search-box{padding:14px 18px;}
+    .search-box input{font-size:16px;}
+    .price-filters{padding:0 32px 14px;}
+    .price-chip{padding:9px 18px;font-size:14px;}
+    .results-count{padding:0 32px 4px;font-size:13px;}
+    #manual-box{padding:0 32px 14px !important;}
+    .results-list{padding:4px 32px 32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;align-content:start;}
+    .result-card{padding:14px 14px;gap:10px;}
+    .result-card img{width:56px !important;height:56px !important;}
+    .result-info .model-name{font-size:15px;}
+    .result-price .num{font-size:17px;}
+
+    /* Detalle del equipo (vertical: apilado y más grande) */
+    .detail-body{padding:28px 40px;gap:22px;}
+    #d-foto{max-height:340px !important;}
+    #d-specs-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .price-panel{padding:28px;}
+    .price-panel .price{font-size:46px;}
+    #detail-body-venta .promo-toggle{padding:18px;font-size:16px;}
+    #detail-body-compra .owner-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+
+    /* Formulario de venta: una columna centrada en vertical */
+    #screen-vender .detail-body{max-width:760px;width:100%;margin:0 auto;}
+
+    /* Ventas y costos */
+    .tabs-compra{padding:16px 32px 0;}
+    #ventas-view{padding:18px 32px 32px !important;}
+    #ventas-lista{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-content:start;}
+  }
+
+  /* Tablet horizontal / pantallas grandes: foto a la izquierda, datos a la derecha */
+  @media (min-width:900px){
+    .detail-body{padding:32px 48px;}
+    #detail-body-venta{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);column-gap:40px;row-gap:18px;align-items:start;}
     #detail-body-venta > .detail-head{grid-column:1 / -1;}
-    #detail-body-venta > #d-foto{grid-column:1;grid-row:2;max-height:360px !important;}
-    #detail-body-venta > #d-swipe-hint{grid-column:1;grid-row:3;}
-    #detail-body-venta > #d-specs-grid{grid-column:2;grid-row:2;}
+    #detail-body-venta > #d-foto{grid-column:1;grid-row:2 / span 5;max-height:420px !important;align-self:start;}
+    #detail-body-venta > #d-swipe-hint{grid-column:1;grid-row:7;}
+    #detail-body-venta > #d-specs-grid{grid-column:2;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));}
     #detail-body-venta > .price-panel{grid-column:2;grid-row:3;}
     #detail-body-venta > .promo-toggle,
     #detail-body-venta > .promo-panel{grid-column:2;}
+    .results-list{padding:4px 48px 36px;}
+    .search-wrap,.price-filters,.results-count{padding-left:48px;padding-right:48px;}
+    .topbar{padding-left:48px;padding-right:48px;}
+    #manual-box{padding:0 48px 14px !important;}
 
-    /* Vista interna de precios de compra */
-    #detail-body-compra .owner-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
-
-    /* Formulario de venta en dos columnas */
-    #screen-vender .detail-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;row-gap:16px;align-items:start;}
+    /* Formulario de venta en dos columnas (horizontal) */
+    #screen-vender .detail-body{max-width:none;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;row-gap:18px;align-items:start;}
     #screen-vender .detail-head,
     #screen-vender #venta-btn-enviar,
     #screen-vender #venta-resultado{grid-column:1 / -1;}
-
-    /* Comparar */
-    #screen-compare .detail-body{padding:24px 32px;}
+    #screen-vender .detail-body > :nth-child(2),
+    #screen-vender .detail-body > :nth-child(3),
+    #screen-vender .detail-body > :nth-child(5){grid-column:1;}
+    #screen-vender .detail-body > :nth-child(4){grid-column:2;grid-row:2 / span 3;}
   }
-  @media (min-width:1100px){
-    .app{max-width:1180px;}
-    .results-list{grid-template-columns:repeat(3,minmax(0,1fr));}
-    #ventas-lista{grid-template-columns:repeat(3,minmax(0,1fr));}
+
+  /* Inicio en horizontal: pantalla dividida (presentación a la izquierda, opciones a la derecha) */
+  @media (min-width:900px) and (orientation:landscape){
+    #screen-home.active{flex-direction:row;position:relative;}
+    #screen-home .home-hero{
+      flex:1 1 38%;border-radius:0 44px 44px 0;display:flex;flex-direction:column;justify-content:center;
+      padding:48px 44px 72px;
+    }
+    #screen-home .home-hero h1{font-size:40px;max-width:420px;}
+    #screen-home .home-cards{
+      flex:1 1 62%;margin-top:0;max-width:none;align-self:stretch;justify-content:center;padding:32px 44px 64px;gap:16px;
+    }
+    #screen-home .choice-card{padding:20px 22px;}
+    #screen-home .choice-icon{width:58px;height:58px;}
+    #screen-home .choice-body p{font-size:14px;}
+    #screen-home .home-footer{position:absolute;left:0;right:0;bottom:6px;}
+  }
+
+  /* Pantallas muy anchas: el contenido no se estira de más */
+  @media (min-width:1500px){
+    .app{max-width:1500px;margin:0 auto;}
   }
 </style>
 </head>
