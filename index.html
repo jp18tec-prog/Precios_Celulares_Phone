@@ -537,6 +537,100 @@
   @media (min-width:1500px){
     .app{max-width:1500px;margin:0 auto;}
   }
+
+/* ==========================================================
+   TEMA CLARO - Better Comunication
+   TEMA CLARO (agregado al final del CSS)
+   No toca tu lógica (JavaScript) ni tus ids/clases.
+   ========================================================== */
+
+:root{
+  --bg:#F6F7F9;
+  --bg-soft:#FFFFFF;
+  --surface:#FFFFFF;
+  --surface-2:#EEF0F3;
+  --line:#DDE1E8;
+  --text:#0F1419;
+  --text-soft:#566070;
+  --accent:#0A8272;
+  --accent-dark:#086E61;
+  --accent-soft:rgba(10,130,114,.10);
+  --warn:#8A5300;
+  --warn-soft:#FFF3DC;
+  --danger:#B3261E;
+  --danger-soft:#FDECEA;
+  --success:#12703F;
+  --success-soft:#E3F6EA;
+  --shadow:0 1px 2px rgba(15,20,25,.06), 0 8px 24px rgba(15,20,25,.06);
+}
+
+/* ---------- Campos de texto ---------- */
+input, select{ background:#FFFFFF; color:var(--text); }
+input::placeholder{ color:#8A93A1; }
+.informe-fechas input, .select-field{ background:#FFFFFF; color:var(--text); color-scheme:light; }
+
+/* ---------- Barra superior ---------- */
+.topbar{ background:#FFFFFF; color:var(--text); border-bottom:1px solid var(--line); }
+.topbar .back{ border:1px solid var(--line); background:#FFFFFF; color:var(--text); }
+.topbar .back:active{ background:var(--surface-2); }
+.brand-text .role{ color:var(--text-soft); }
+.brand-mark svg path{ stroke:#FFFFFF; }
+.brand-mark svg circle{ fill:#FFFFFF; }
+
+/* ---------- Inicio ---------- */
+.home-hero{ background:#FFFFFF; color:var(--text); border-bottom:1px solid var(--line); border-radius:0 0 28px 28px; }
+.home-hero::before, .home-hero::after, .hero-grid{ display:none; }
+.home-hero .eyebrow{ color:var(--text-soft); }
+.home-hero h1{ color:var(--text); }
+.hero-mark{ box-shadow:0 6px 16px rgba(10,130,114,.25); }
+.hero-date{ color:var(--text-soft); background:var(--surface-2); border:1px solid var(--line); }
+
+.choice-card{ background:#FFFFFF; box-shadow:var(--shadow); }
+.choice-card::after{ display:none; }
+.choice-card.primary{ border-color:var(--accent); }
+.choice-card.secondary{ border-color:var(--line); }
+.choice-card.primary .choice-icon{ background:var(--accent); color:#FFFFFF; box-shadow:none; }
+.choice-card.secondary .choice-icon{ background:var(--surface-2); color:var(--text-soft); box-shadow:none; }
+.choice-arrow{ background:var(--surface-2); color:var(--text); }
+.choice-tags span{ background:var(--surface-2); border:1px solid var(--line); color:var(--text-soft); }
+
+/* ---------- Catálogo ---------- */
+.search-box{ background:#FFFFFF; }
+.result-card{ background:#FFFFFF; }
+.result-card:active{ background:var(--surface-2); }
+.result-card img, #d-foto{ background:#ECEFF3 !important; }
+.price-chip{ background:#FFFFFF; }
+
+/* ---------- Detalle ---------- */
+#d-foto{ border:1px solid var(--line); }
+.price-panel{ background:#FFFFFF; color:var(--text); border:1px solid var(--line); box-shadow:var(--shadow); }
+.price-panel::after{ display:none; }
+.price-panel .label{ color:var(--text-soft); }
+.promo-toggle[style*="C4B5FD"]{ background:var(--surface-2) !important; color:var(--text) !important; border:1px solid var(--line); }
+.btn-check, .login-btn, .pin-confirm, .price-chip.active{ color:#FFFFFF; }
+.promo-toggle[style*="background:var(--accent)"]{ color:#FFFFFF !important; }
+
+/* ---------- Comparar ---------- */
+#compare-table thead tr{ background:var(--surface-2) !important; color:var(--text) !important; }
+#compare-table{ background:#FFFFFF !important; }
+
+/* ---------- Formularios y paneles ---------- */
+.promo-panel, .owner-box, .login-card, .pin-box{ background:#FFFFFF; }
+.vender-mini-btn{ background:#FFFFFF; color:var(--accent); border-color:var(--accent); }
+.informe-rapidos button{ background:#FFFFFF; color:var(--accent); }
+
+/* ---------- Zona privada: franja ámbar para distinguirla ---------- */
+#screen-owner .topbar{ border-top:6px solid #E8A23A; }
+#tabs-compra{ border-top:0; }
+
+/* ---------- Aviso flotante ---------- */
+.toast{ background:var(--success-soft); border:1px solid rgba(18,112,63,.4); color:var(--success); box-shadow:0 10px 24px rgba(15,20,25,.15); }
+
+/* ---------- Pantalla de bloqueo en PC ---------- */
+.desktop-block{ background:var(--bg); color:var(--text); }
+.desktop-block p{ color:var(--text-soft); }
+.login-card{ box-shadow:0 16px 40px rgba(15,20,25,.12); border:1px solid var(--line); }
+
 </style>
 </head>
 <body>
